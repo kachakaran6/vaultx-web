@@ -90,10 +90,8 @@ out
 
 # Gatsby build output
 .cache
-public
 
 # Vite specific
-dist
 dist-ssr
 *.local
 *.tsbuildinfo
