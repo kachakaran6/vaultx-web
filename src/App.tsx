@@ -9,15 +9,17 @@ import { FloatingAddButton } from "./components/FloatingAddButton";
 import { PinGate } from "./components/PinGate";
 import { ReminderDialog } from "./components/ReminderDialog";
 import { ToastViewport } from "./components/ToastViewport";
+import { MobileLanding } from "./components/MobileLanding";
 import { useAppBootstrap } from "./hooks/useAppBootstrap";
 import { useClipboardWatcher } from "./hooks/useClipboardWatcher";
 import { useReminderEngine } from "./hooks/useReminderEngine";
 import { useVaultLock } from "./hooks/useVaultLock";
-import { MobileLanding } from "./components/MobileLanding";
+import { LandingPage } from "./pages/LandingPage";
 import { CategoriesPage } from "./pages/CategoriesPage";
 import { HomePage } from "./pages/HomePage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { StatsPage } from "./pages/StatsPage";
+import { SyncPage } from "./pages/SyncPage";
 import { useAppStore } from "./store/app-store";
 
 function LoadingScreen() {
@@ -39,19 +41,23 @@ export default function App() {
   useVaultLock(ready);
 
   const [showMobileLanding, setShowMobileLanding] = useState(() => {
-    // Initial check on mount
     if (typeof window === "undefined") return false;
 
-    const isMobileSize = window.innerWidth < 768;
-    const isMobileUA = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const hasTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-    const isBypassed = localStorage.getItem("vaultx_mobile_bypass") === "true";
+    // Strict mobile device detection (avoid false positives on desktop touchscreens)
+    const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // 7-Day Expiration Cache Logic
+    const bypassTimestamp = localStorage.getItem("vaultx_mobile_bypass_time");
+    if (bypassTimestamp) {
+      const daysElapsed = (Date.now() - parseInt(bypassTimestamp, 10)) / (1000 * 60 * 60 * 24);
+      if (daysElapsed < 7) return false; // Less than 7 days? Continue bypass
+    }
 
-    return (isMobileSize || isMobileUA || hasTouch) && !isBypassed;
+    return isMobileUA; // Only show overlay strictly to true mobile agents
   });
 
   const handleContinue = () => {
-    localStorage.setItem("vaultx_mobile_bypass", "true");
+    localStorage.setItem("vaultx_mobile_bypass_time", Date.now().toString());
     setShowMobileLanding(false);
   };
 
@@ -66,6 +72,7 @@ export default function App() {
         <>
           <Routes>
             <Route path="/" element={<Navigate to="/home" replace />} />
+            <Route path="/sync" element={<SyncPage />} />
             <Route element={<AppShell />}>
               <Route path="/home" element={<HomePage />} />
               <Route path="/categories" element={<CategoriesPage />} />

@@ -7,17 +7,18 @@ interface StatCardProps {
 export function StatCard({ label, value, tone }: StatCardProps) {
   return (
     <div
-      className="rounded-[20px] border bg-vault-card/95 p-5 shadow-card"
-      style={{
-        borderColor: `${tone}55`,
-        boxShadow: `0 12px 28px color-mix(in srgb, ${tone} 12%, transparent), 0 18px 40px rgba(0,0,0,0.24)`
-      }}
+      className="bg-card border border-border p-5 rounded-lg shadow-sm transition-all duration-150 hover:shadow-md relative overflow-hidden"
     >
-      <div className="text-[11px] font-bold uppercase tracking-[0.25em]" style={{ color: tone }}>
+      <div 
+        className="absolute top-0 left-0 w-full h-[2px] opacity-70"
+        style={{ backgroundColor: tone }}
+      />
+      
+      <div className="text-[13px] font-semibold text-muted-foreground">
         {label}
       </div>
-      <div className="mt-3 text-3xl font-black" style={{ color: tone }}>
-        {value}
+      <div className="mt-1.5 text-[28px] font-bold tracking-tight text-foreground flex items-baseline gap-1">
+        <span className="tabular-nums" style={{ color: tone }}>{value}</span>
       </div>
     </div>
   );

@@ -1,12 +1,13 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect } from "react";
 import { useToastStore } from "../store/toast-store";
+import { CheckCircle2, AlertCircle, Info, XCircle } from "lucide-react";
 
-const TONE_COLORS = {
-  info: "bg-vault-primary",
-  success: "bg-vault-success",
-  warning: "bg-vault-warning",
-  danger: "bg-vault-danger"
+const TONE_MAP = {
+  info: { color: "text-blue-500", icon: Info },
+  success: { color: "text-emerald-500", icon: CheckCircle2 },
+  warning: { color: "text-orange-500", icon: AlertCircle },
+  danger: { color: "text-rose-500", icon: XCircle }
 } as const;
 
 export function ToastViewport() {
@@ -25,25 +26,30 @@ export function ToastViewport() {
   }, [toasts, dismiss]);
 
   return (
-    <div className="fixed bottom-6 right-6 z-[70] flex flex-col gap-3 w-80 pointer-events-none">
-      <AnimatePresence>
-        {toasts.map((toast) => (
-          <motion.div
-            key={toast.id}
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 10 }}
-            className="flex items-start gap-3 p-4 rounded-xl border border-vault-border bg-vault-card shadow-2xl pointer-events-auto"
-          >
-            <div className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${TONE_COLORS[toast.tone]}`} />
-            <div className="min-w-0">
-              <h4 className="text-sm font-bold text-vault-text tracking-tight">{toast.title}</h4>
-              {toast.description && (
-                <p className="mt-1 text-xs text-vault-muted leading-relaxed">{toast.description}</p>
-              )}
-            </div>
-          </motion.div>
-        ))}
+    <div className="fixed bottom-6 right-6 z-[70] flex flex-col-reverse gap-3 w-80 pointer-events-none">
+      <AnimatePresence initial={false}>
+        {toasts.map((toast) => {
+          const config = TONE_MAP[toast.tone];
+          const Icon = config.icon;
+          return (
+            <motion.div
+              key={toast.id}
+              initial={{ opacity: 0, x: 40, scale: 0.95 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: 20, transition: { duration: 0.15 } }}
+              layout
+              className="flex items-start gap-3.5 p-4 rounded-lg border border-border bg-card shadow-lg pointer-events-auto"
+            >
+              <Icon className={`h-5 w-5 shrink-0 ${config.color}`} strokeWidth={2.5} />
+              <div className="min-w-0 pt-0.5">
+                <h4 className="text-[14px] font-semibold text-foreground leading-none">{toast.title}</h4>
+                {toast.description && (
+                  <p className="mt-1.5 text-[13px] font-medium text-muted-foreground leading-snug">{toast.description}</p>
+                )}
+              </div>
+            </motion.div>
+          );
+        })}
       </AnimatePresence>
     </div>
   );

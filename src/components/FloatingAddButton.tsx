@@ -19,10 +19,10 @@ export function FloatingAddButton() {
     <button
       type="button"
       onClick={() => openAddDialog()}
-      className="fixed bottom-8 right-8 z-40 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-vault-primary text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
-      aria-label="Add Link"
+      className="fixed bottom-20 right-6 lg:bottom-8 lg:right-8 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/30 transition-all duration-200 hover:scale-105 hover:shadow-xl active:scale-95 outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2 focus:ring-offset-background"
+      aria-label="Add new item"
     >
-      <Plus size={26} strokeWidth={2.5} />
+      <Plus size={28} strokeWidth={2.5} />
     </button>
   );
 }

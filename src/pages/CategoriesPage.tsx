@@ -2,7 +2,10 @@ import { useMemo, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { SearchBar } from "../components/SearchBar";
+import { Button } from "../components/ui/Button";
 import { selectLinkCountsByCategory, useAppStore } from "../store/app-store";
+
+import { PageHeader } from "../components/ui/PageHeader";
 
 export function CategoriesPage() {
   const navigate = useNavigate();
@@ -18,27 +21,24 @@ export function CategoriesPage() {
   }, [state.categories, search, linkCounts]);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <header className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-vault-text">Categories</h1>
-          <p className="mt-1 text-sm text-vault-muted">Organize your links into custom collections.</p>
-        </div>
-        <button
-          type="button"
+    <div className="space-y-6 animate-in fade-in duration-200">
+      {/* Compact Category Utility Row */}
+      <div className="flex items-center justify-between pb-2 border-b border-border/40">
+        <span className="text-[12px] font-bold text-muted-foreground/60 uppercase tracking-wider">
+          {filteredCategories.length} Collections Available
+        </span>
+        <Button
           onClick={() => state.openCategoryDialog()}
-          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-vault-primary text-sm font-bold text-white shadow-subtle transition hover:opacity-90 active:scale-95"
+          leftIcon={<Plus size={14} />}
+          size="sm"
+          variant="secondary"
+          className="h-8 text-[12px]"
         >
-          <Plus size={18} strokeWidth={2.5} />
-          Create Category
-        </button>
-      </header>
-
-      <div className="max-w-md">
-        <SearchBar value={search} onChange={setSearch} />
+          Create Collection
+        </Button>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
         {filteredCategories.map((category) => {
           const count = linkCounts.get(category.id) ?? 0;
           return (
@@ -49,15 +49,21 @@ export function CategoriesPage() {
                 state.toggleCategoryFilter(category.id);
                 navigate("/home");
               }}
-              className="flex items-center justify-between p-4 rounded-xl border border-vault-border bg-vault-card group border-l-4 transition-all hover:border-vault-primary/40 cursor-pointer active:scale-[0.98]"
-              style={{ borderLeftColor: category.color }}
+              className="flex items-center justify-between p-5 bg-card border border-border rounded-lg shadow-sm group cursor-pointer hover:shadow-md hover:border-border/80 transition-all active:scale-[0.99] relative overflow-hidden"
             >
-              <div className="flex items-center gap-4 min-w-0">
-                <div className="text-2xl shrink-0">{category.icon}</div>
+              <div 
+                className="absolute inset-y-0 left-0 w-1"
+                style={{ backgroundColor: category.color }}
+              />
+              
+              <div className="flex items-center gap-4 min-w-0 pl-1">
+                <div className="w-10 h-10 rounded-lg bg-secondary/50 flex items-center justify-center text-xl shrink-0 border border-border/40">
+                  {category.icon}
+                </div>
                 <div className="min-w-0">
-                  <h3 className="font-bold text-vault-text truncate">{category.name}</h3>
-                  <p className="text-xs text-vault-muted font-medium uppercase tracking-tighter">
-                    {count} {count === 1 ? "item" : "items"}
+                  <h3 className="text-[15px] font-semibold text-foreground tracking-tight truncate group-hover:text-primary transition-colors">{category.name}</h3>
+                  <p className="text-[12px] text-muted-foreground font-medium mt-0.5">
+                    {count} {count === 1 ? "link" : "links"}
                   </p>
                 </div>
               </div>
@@ -67,11 +73,11 @@ export function CategoriesPage() {
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (window.confirm(`Delete category "${category.name}"? Links will be moved to general.`)) {
+                    if (window.confirm(`Delete collection "${category.name}"? All items inside will remain safely in General.`)) {
                       void state.deleteCategory(category.id);
                     }
                   }}
-                  className="p-2 rounded-lg text-vault-muted hover:text-vault-danger hover:bg-vault-danger/10 transition-colors opacity-0 group-hover:opacity-100"
+                  className="p-2 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100"
                 >
                   <Trash2 size={16} />
                 </button>
@@ -82,8 +88,8 @@ export function CategoriesPage() {
       </div>
 
       {filteredCategories.length === 0 && (
-        <div className="flex h-64 flex-col items-center justify-center text-center rounded-2xl border border-dashed border-vault-border bg-vault-card/30">
-          <p className="text-sm text-vault-muted">No categories found.</p>
+        <div className="flex h-64 flex-col items-center justify-center text-center rounded-lg border border-dashed border-border bg-card/50">
+          <p className="text-[14px] font-medium text-muted-foreground">No results found</p>
         </div>
       )}
     </div>

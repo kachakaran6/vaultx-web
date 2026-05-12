@@ -17,14 +17,14 @@ export function ClipboardPrompt() {
           exit={{ opacity: 0, y: 100 }}
           className="fixed bottom-24 left-1/2 z-30 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 lg:left-[calc(240px+50%)] lg:-translate-x-1/2"
         >
-          <div className="flex items-center justify-between gap-4 rounded-xl border border-vault-border bg-vault-card p-4 shadow-2xl">
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border/40 bg-card/95 backdrop-blur-xl p-4 shadow-neu-convex">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-vault-primary/10 text-vault-primary">
-                <LinkIcon size={20} />
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-neu-soft">
+                <LinkIcon size={20} strokeWidth={2.5} />
               </div>
               <div className="min-w-0">
-                <p className="text-[11px] font-bold text-vault-muted uppercase tracking-wider">Link detected</p>
-                <p className="truncate text-sm font-semibold text-vault-text">{getDomain(url)}</p>
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Buffer Signal</p>
+                <p className="truncate text-[15px] font-bold text-foreground tracking-tight">{getDomain(url)}</p>
               </div>
             </div>
 
@@ -32,7 +32,7 @@ export function ClipboardPrompt() {
               <button
                 type="button"
                 onClick={() => void dismiss()}
-                className="px-4 py-2 rounded-lg text-sm font-bold text-vault-muted hover:text-vault-text hover:bg-vault-elevated transition-colors"
+                className="px-4 py-2 rounded-xl text-xs font-bold text-muted-foreground hover:text-foreground transition-colors"
               >
                 Ignore
               </button>
@@ -42,9 +42,9 @@ export function ClipboardPrompt() {
                   openAdd(undefined, url);
                   void dismiss();
                 }}
-                className="px-4 py-2 rounded-lg bg-vault-primary text-sm font-bold text-white shadow-subtle transition hover:opacity-90 active:scale-95"
+                className="px-5 py-2.5 rounded-xl bg-primary text-xs font-black uppercase tracking-widest text-white shadow-neu-soft hover:shadow-neu-convex transition-all hover:scale-[1.05] active:scale-95"
               >
-                Save Link
+                Capture
               </button>
             </div>
           </div>

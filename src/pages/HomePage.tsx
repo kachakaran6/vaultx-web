@@ -1,11 +1,12 @@
 import { useMemo } from "react";
-import { Heart } from "lucide-react";
+import { Heart, Layers, Plus } from "lucide-react";
 import { CategoryRail } from "../components/CategoryRail";
 import { LinkList } from "../components/LinkList";
 import { SearchBar } from "../components/SearchBar";
-import { VaultOrb } from "../components/VaultOrb";
+import { Button } from "../components/ui/Button";
 import { selectLinkCountsByCategory, selectVisibleLinks, useAppStore } from "../store/app-store";
-import { VAULT_PALETTE } from "../utils/colors";
+
+import { PageHeader } from "../components/ui/PageHeader";
 
 export function HomePage() {
   const state = useAppStore();
@@ -23,98 +24,91 @@ export function HomePage() {
   const allowDrag = state.homeView === "all" && !state.searchQuery && !state.selectedCategoryId;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <header className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-vault-text">All Links</h1>
-          <p className="text-sm text-vault-muted mt-1">{state.links.length} items collected</p>
-        </div>
-
-        <div className="inline-flex h-10 items-center gap-1 rounded-xl bg-vault-card p-1 border border-vault-border">
+    <div className="space-y-6 animate-in fade-in duration-300">
+      {/* Unified Compact Filter Rail */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 pb-2 border-b border-border/40">
+        <div className="flex p-0.5 bg-secondary/80 rounded-lg border border-border/40 shadow-sm shrink-0 w-fit">
           <button
             type="button"
             onClick={() => state.setHomeView("all")}
-            className={`px-4 py-1.5 text-sm font-medium transition-all rounded-lg ${state.homeView === "all"
-              ? "bg-vault-elevated text-vault-text border border-vault-border shadow-subtle"
-              : "text-vault-muted hover:text-vault-text"
-              }`}
+            className={`px-3.5 h-[28px] text-[12px] font-semibold transition-all flex items-center gap-2 rounded-[6px] ${
+              state.homeView === "all"
+              ? "bg-card text-foreground shadow-sm border border-border/20"
+              : "text-muted-foreground hover:text-foreground"
+            }`}
           >
-            All Links
+            All
           </button>
           <button
             type="button"
             onClick={() => state.setHomeView("favorites")}
-            className={`flex items-center gap-2 px-4 py-1.5 text-sm font-medium transition-all rounded-lg ${state.homeView === "favorites"
-              ? "bg-vault-elevated text-vault-text border border-vault-border shadow-subtle"
-              : "text-vault-muted hover:text-vault-text"
-              }`}
+            className={`px-3.5 h-[28px] text-[12px] font-semibold transition-all flex items-center gap-2 rounded-[6px] ${
+              state.homeView === "favorites"
+              ? "bg-card text-foreground shadow-sm border border-border/20"
+              : "text-muted-foreground hover:text-foreground"
+            }`}
           >
-            <Heart size={14} className={state.homeView === "favorites" ? "fill-vault-danger text-vault-danger" : ""} />
+            <Heart size={12} className={state.homeView === "favorites" ? "fill-primary text-primary" : ""} />
             Favorites
           </button>
         </div>
-      </header>
-
-      <div className="space-y-4">
-        <SearchBar value={state.searchQuery} onChange={state.setSearchQuery} />
-
+        
         {state.categories.length > 0 && (
-          <CategoryRail
-            categories={state.categories}
-            counts={linkCounts}
-            selectedCategoryId={state.selectedCategoryId}
-            onToggle={state.toggleCategoryFilter}
-          />
+          <div className="flex-1 min-w-0 overflow-x-auto hide-scrollbar">
+            <CategoryRail
+              categories={state.categories}
+              counts={linkCounts}
+              selectedCategoryId={state.selectedCategoryId}
+              onToggle={state.toggleCategoryFilter}
+            />
+          </div>
         )}
       </div>
 
-      <section className="min-h-[400px]">
+      {/* Main Listing Area */}
+      <section className="min-h-[300px]">
         {visibleLinks.length === 0 ? (
-          <div className="flex h-[400px] flex-col items-center justify-center text-center rounded-3xl border border-dashed border-vault-border bg-vault-card/30">
-            <div className="text-4xl opacity-50">{hasFilter ? "🔍" : "📦"}</div>
-            <h2 className="mt-4 text-lg font-semibold text-vault-text">
-              {hasFilter ? "No matches found" : "Your vault is empty"}
+          <div className="flex min-h-[450px] py-12 flex-col items-center justify-center text-center border border-dashed border-border bg-card rounded-lg shadow-sm">
+            <div className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center text-muted-foreground mb-5">
+              <Layers size={24} />
+            </div>
+            <h2 className="text-xl font-semibold text-foreground tracking-tight">
+              {hasFilter ? "No results found" : "Start building your vault"}
             </h2>
-            <p className="mt-1 text-sm text-vault-muted max-w-xs mx-auto">
+            <p className="mt-2 text-[14px] text-muted-foreground max-w-sm mx-auto leading-relaxed">
               {hasFilter
-                ? "Try adjusting your search or filters to find what you're looking for."
-                : "Start by adding your first link to your personal vault."}
+                ? "We couldn't find any links matching your active filters. Try searching for something else."
+                : "Store articles, tools, and sites you love in one organized dashboard."}
             </p>
-            {hasFilter ? (
-              <button
-                type="button"
-                onClick={state.clearFilters}
-                className="mt-6 rounded-xl border border-vault-border bg-vault-card px-4 py-2 text-sm font-medium text-vault-text hover:bg-vault-elevated transition"
-              >
-                Clear Filters
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => state.openAddDialog()}
-                className="mt-6 rounded-xl bg-vault-primary px-6 py-2.5 text-sm font-bold text-white shadow-subtle hover:brightness-110 transition"
-              >
-                Add Link
-              </button>
-            )}
+            <div className="mt-8">
+              {hasFilter ? (
+                <Button variant="secondary" size="md" onClick={state.clearFilters}>
+                  Clear Filters
+                </Button>
+              ) : (
+                <Button variant="primary" size="lg" onClick={() => state.openAddDialog()} leftIcon={<Plus size={20} />}>
+                  Add First Link
+                </Button>
+              )}
+            </div>
           </div>
         ) : (
           <div className="space-y-4">
             {hasFilter && (
-              <div className="flex items-center justify-between py-1 border-b border-vault-border">
-                <span className="text-xs font-bold uppercase tracking-wider text-vault-muted">
+              <div className="flex items-center justify-between py-2 px-1">
+                <span className="text-[12px] font-medium text-muted-foreground tracking-tight">
                   {state.searchQuery
-                    ? `Results for "${state.searchQuery}"`
+                    ? `Search results for "${state.searchQuery}"`
                     : state.selectedCategoryId
                       ? `Category: ${categoriesById.get(state.selectedCategoryId)?.name}`
-                      : "Filtered Results"}
+                      : "Favorite items"}
                 </span>
                 <button
                   type="button"
                   onClick={state.clearFilters}
-                  className="text-xs font-bold text-vault-primary hover:underline"
+                  className="text-xs font-semibold text-primary hover:underline"
                 >
-                  Clear all
+                  Reset Filters
                 </button>
               </div>
             )}
@@ -147,22 +141,21 @@ export function HomePage() {
         )}
       </section>
 
-      <footer className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-8 border-t border-vault-border">
-        <div className="p-4 rounded-xl border border-vault-border bg-vault-card/50">
-          <p className="text-[11px] font-bold text-vault-muted uppercase tracking-wider">Total Items</p>
-          <p className="mt-1 text-2xl font-bold text-vault-text">{state.links.length}</p>
+      {/* Compact Footer Summary Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-6 border-t border-border/40">
+        <div className="bg-card p-5 rounded-lg border border-border shadow-sm flex flex-col">
+          <span className="text-[12px] font-medium text-muted-foreground mb-1">Active Links</span>
+          <span className="text-xl font-bold tracking-tight">{state.links.length}</span>
         </div>
-        <div className="p-4 rounded-xl border border-vault-border bg-vault-card/50">
-          <p className="text-[11px] font-bold text-vault-muted uppercase tracking-wider">Total Visits</p>
-          <p className="mt-1 text-2xl font-bold text-vault-text">
-            {state.links.reduce((sum, link) => sum + link.visitCount, 0)}
-          </p>
+        <div className="bg-card p-5 rounded-lg border border-border shadow-sm flex flex-col">
+          <span className="text-[12px] font-medium text-muted-foreground mb-1">Total Visits</span>
+          <span className="text-xl font-bold tracking-tight">{state.links.reduce((sum, link) => sum + link.visitCount, 0)}</span>
         </div>
-        <div className="p-4 rounded-xl border border-vault-border bg-vault-card/50">
-          <p className="text-[11px] font-bold text-vault-muted uppercase tracking-wider">Categories</p>
-          <p className="mt-1 text-2xl font-bold text-vault-text">{state.categories.length}</p>
+        <div className="bg-card p-5 rounded-lg border border-border shadow-sm flex flex-col">
+          <span className="text-[12px] font-medium text-muted-foreground mb-1">Collections</span>
+          <span className="text-xl font-bold tracking-tight">{state.categories.length}</span>
         </div>
-      </footer>
+      </div>
     </div>
   );
 }

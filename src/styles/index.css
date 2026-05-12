@@ -2,55 +2,187 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: dark;
+@layer base {
+  :root {
+    /* System Scale Base Values */
+    --radius-card: 12px;
+    --radius-element: 10px;
+    --primary-h: 225;
+    --primary-s: 100%;
+    --primary-l: 65%;
+  }
+
+  /* ───────────────────────────────────────────────────────
+     PREMIUM FLAT PALETTE (LIGHT MODE)
+     ─────────────────────────────────────────────────────── */
+  :root,
+  :root[data-theme="light"] {
+    --background: 227 33% 97.6%; /* #F6F7FB */
+    --foreground: 221 39% 11%;    /* #111827 */
+    
+    --card: 0 0% 100%;          /* #FFFFFF */
+    --card-foreground: 221 39% 11%;
+    
+    --primary: 225 100% 65%;      /* #4F7CFF */
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 223 29% 96.1%;   /* #F1F3F8 */
+    --secondary-foreground: 220 9% 46%; /* #6B7280 */
+    
+    --muted: 223 29% 96.1%;
+    --muted-foreground: 220 9% 46%;
+    
+    --accent: 225 100% 65%;
+    --accent-foreground: 221 39% 11%;
+    
+    --destructive: 0 84% 60%;     /* #EF4444 */
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 220 13% 91%;        /* #E5E7EB */
+    --input: 220 13% 91%;
+    --ring: 225 100% 65%;
+  }
+
+  /* ───────────────────────────────────────────────────────
+     PREMIUM FLAT PALETTE (DARK MODE)
+     ─────────────────────────────────────────────────────── */
+  :root[data-theme="dark"] {
+    --background: 222 47% 4%;
+    --foreground: 210 40% 98%;
+    
+    --card: 222 47% 8%;
+    --card-foreground: 210 40% 98%;
+    
+    --primary: 225 100% 65%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 217 32% 15%;
+    --secondary-foreground: 215 20% 75%;
+    
+    --muted: 217 32% 12%;
+    --muted-foreground: 215 20% 65%;
+    
+    --accent: 225 100% 65%;
+    --accent-foreground: 210 40% 98%;
+    
+    --destructive: 0 62% 40%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 217 32% 16%;
+    --input: 217 32% 16%;
+    --ring: 225 100% 65%;
+  }
+
+  /* ACCENT OVERRIDES - Softened to match the minimal styling */
+  :root[data-accent="blue"] { --primary: 225 100% 65%; }
+  :root[data-accent="purple"] { --primary: 250 89% 74%; }
+  :root[data-accent="emerald"] { --primary: 142 71% 45%; }
+  :root[data-accent="orange"] { --primary: 38 92% 50%; }
+  :root[data-accent="pink"] { --primary: 330 81% 60%; }
+  :root[data-accent="slate"] { --primary: 220 9% 46%; }
 }
 
-html {
-  background: #0B0F14;
+@layer base {
+  * {
+    @apply border-border selection:bg-primary/20;
+    transition-property: background-color, border-color, color, box-shadow;
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    @apply bg-background;
+  }
+  
+  body {
+    @apply bg-background text-foreground antialiased overflow-x-hidden;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+    min-height: 100vh;
+  }
+
+  /* Standard Typography Hierarchy for Modern Productivity Workspace */
+  h1 { @apply text-4xl font-bold tracking-[-0.03em] text-foreground; }
+  h2 { @apply text-xl font-semibold tracking-[-0.01em] text-foreground; }
+  h3 { @apply text-lg font-medium text-foreground; }
+  p { @apply text-[14px] leading-relaxed; }
 }
 
+@layer utilities {
+  .text-primary-accent {
+    color: hsl(var(--primary));
+  }
+  
+  .bg-subtle {
+    background-color: rgba(79, 124, 255, 0.12);
+  }
+
+  /* Clean elegant container class */
+  .card-base {
+    @apply bg-card border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+
+  .input-base {
+    @apply h-[44px] px-4 rounded-md border border-border bg-card outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all;
+  }
+
+  .btn-base {
+    @apply h-[42px] px-5 inline-flex items-center justify-center font-medium rounded-md transition-all active:scale-[0.98];
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Modern thin scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--secondary-foreground) / 0.3);
+  }
+}
+
+/* ───────────────────────────────────────────────────────
+   RESPONSIVE OPTIMIZATIONS & PERFORMANCE OVERRIDES
+   ─────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  h1 { font-size: 1.75rem !important; letter-spacing: -0.02em !important; }
+  h2 { font-size: 1.15rem !important; }
+  
+  /* Disable expensive background transitions to boost FPS on mobile scrolls */
+  * {
+    transition-duration: 150ms !important;
+  }
+  
+  /* Touch specific dynamic click surface extensions */
+  button, a {
+    min-height: 32px;
+    touch-action: manipulation; /* Eliminate 300ms tap delay */
+  }
+
+  /* Native look momentum scrolling */
+  .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Support for devices with software Home Bars (iPhone X+, modern Android) */
 body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  background: #0B0F14;
-  color: #E6EDF3;
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-button,
-input,
-select,
-textarea {
-  font: inherit;
-}
-
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(15, 15, 20, 0.8);
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(58, 134, 255, 0.25);
-  border-radius: 999px;
-}
-
-#root {
-  min-height: 100vh;
+  padding-bottom: env(safe-area-inset-bottom, 0);
 }
