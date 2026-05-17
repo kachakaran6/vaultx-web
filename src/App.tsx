@@ -20,6 +20,7 @@ import { HomePage } from "./pages/HomePage";
 import { SettingsPage } from "./pages/SettingsPage";
 import { StatsPage } from "./pages/StatsPage";
 import { SyncPage } from "./pages/SyncPage";
+import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
 import { useAppStore } from "./store/app-store";
 
 function LoadingScreen() {
@@ -73,6 +74,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/home" replace />} />
             <Route path="/sync" element={<SyncPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route element={<AppShell />}>
               <Route path="/home" element={<HomePage />} />
               <Route path="/categories" element={<CategoriesPage />} />
