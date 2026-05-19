@@ -21,6 +21,7 @@ import { SettingsPage } from "./pages/SettingsPage";
 import { StatsPage } from "./pages/StatsPage";
 import { SyncPage } from "./pages/SyncPage";
 import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
+import { ClusterPage } from "./pages/ClusterPage";
 import { useAppStore } from "./store/app-store";
 
 function LoadingScreen() {
@@ -75,6 +76,7 @@ export default function App() {
             <Route path="/" element={<Navigate to="/home" replace />} />
             <Route path="/sync" element={<SyncPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route path="/cluster" element={<ClusterPage />} />
             <Route element={<AppShell />}>
               <Route path="/home" element={<HomePage />} />
               <Route path="/categories" element={<CategoriesPage />} />
