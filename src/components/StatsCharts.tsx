@@ -22,7 +22,10 @@ export function StatsCharts({ slices }: StatsChartsProps) {
   }
 
   return (
-    <div className="grid gap-8 rounded-lg border border-border bg-card p-6 shadow-sm md:grid-cols-[200px_1fr]">
+    <div className="grid gap-6 rounded-xl border border-border bg-surface p-6 shadow-sm flex-col xl:flex-row items-center">
+      <div className="w-full flex justify-between items-center mb-2 xl:hidden">
+        <h3 className="text-base font-semibold text-text">Breakdown</h3>
+      </div>
       <div className="relative mx-auto h-40 w-40">
         <svg viewBox="0 0 140 140" className="h-full w-full -rotate-90">
           <circle cx="70" cy="70" r="54" fill="none" className="stroke-secondary" strokeWidth="14" />

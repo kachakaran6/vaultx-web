@@ -1,4 +1,3 @@
-import { Bell, BellRing, Copy, ExternalLink, GripVertical, Heart, Pencil, Trash2, LinkIcon } from "lucide-react";
 import { pushToast } from "../store/toast-store";
 import { buildFaviconUrl, getDomain } from "../utils/url";
 import type { CategoryRecord, LinkRecord } from "../store/types";
@@ -33,7 +32,9 @@ export function LinkCard({
 }: LinkCardProps) {
   const domain = getDomain(link.url);
 
-  const handleCopy = async () => {
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     try {
       await navigator.clipboard.writeText(link.url);
       pushToast({
@@ -53,123 +54,117 @@ export function LinkCard({
   return (
     <article
       className={cn(
-        "group relative flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-card border border-border rounded-lg shadow-sm transition-all duration-150 hover:border-border/80 hover:shadow-md",
-        dragging && "opacity-50 ring-2 ring-primary/20 shadow-none scale-100 pointer-events-none"
+        "flex items-center gap-4 p-4 bg-surface border border-border rounded-xl hover:border-accent/50 hover:bg-surface-2/30 transition-all duration-200 group relative overflow-hidden",
+        dragging && "opacity-50 ring-2 ring-accent/20 shadow-none scale-100 pointer-events-none"
       )}
     >
       {category && (
         <div
-          className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-lg"
+          className="absolute left-0 top-0 bottom-0 w-[4px] bg-accent/80"
           style={{ backgroundColor: category.color }}
         />
       )}
 
-      <div className="flex-1 flex items-center gap-3 sm:gap-4 min-w-0">
-        <div className="flex items-center gap-3 shrink-0 pl-1">
-        {dragHandle && (
-          <div className="text-muted-foreground opacity-0 group-hover:opacity-60 cursor-grab active:cursor-grabbing transition-opacity -ml-2">
-            {dragHandle}
-          </div>
-        )}
-
-        <div className="relative flex h-10 w-10 items-center justify-center rounded-md bg-secondary/40 border border-border/50 overflow-hidden shadow-sm">
-          <img
-            src={buildFaviconUrl(link.url)}
-            alt=""
-            className="h-5 w-5 object-contain grayscale-[0.2] group-hover:grayscale-0 transition-all"
-            onError={(event) => {
-              event.currentTarget.style.display = "none";
-            }}
-          />
+      {dragHandle && (
+        <div className="text-text-faint hover:text-text-muted cursor-grab active:cursor-grabbing transition-colors -ml-2 shrink-0">
+          {dragHandle}
         </div>
+      )}
+
+      <div className="w-10 h-10 rounded-lg bg-surface-2 flex items-center justify-center border border-border/50 shrink-0 overflow-hidden">
+        <img
+          src={buildFaviconUrl(link.url)}
+          alt=""
+          className="w-5 h-5 object-contain"
+          onError={(event) => {
+            event.currentTarget.style.display = "none";
+          }}
+        />
       </div>
 
-      <div className="min-w-0 flex-1 py-1">
-        <div className="flex items-center gap-2.5 mb-1">
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-0.5">
           <a
             href={link.url}
             target={openInExternalBrowser ? "_blank" : "_self"}
             rel="noreferrer"
             onClick={onRecordVisit}
-            className="truncate text-[15px] font-semibold text-foreground hover:text-primary transition-colors tracking-tight leading-snug"
+            className="text-base text-text font-semibold tracking-tight truncate group-hover:text-accent transition-colors focus:outline-none focus:underline"
           >
             {link.title}
           </a>
-          
           {hasReminder && (
-            <BellRing size={13} className="text-primary shrink-0" />
+            <span className="material-symbols-outlined text-[14px] text-accent" style={{ fontVariationSettings: "'FILL' 1" }}>notifications_active</span>
           )}
-          
           {link.isFavorite && (
-            <Heart size={13} className="fill-rose-500 text-rose-500 shrink-0" />
+            <span className="material-symbols-outlined text-[14px] text-danger" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
           )}
         </div>
-
-        <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-[13px] text-muted-foreground font-medium">
-          <span className="truncate opacity-80 flex items-center gap-1"><LinkIcon size={12} /> {domain}</span>
-          <span className="w-1 h-1 rounded-full bg-muted-foreground/40 shrink-0" />
-          <span className="tabular-nums opacity-75">{link.visitCount} {link.visitCount === 1 ? 'click' : 'clicks'}</span>
-          
-          {link.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 ml-1">
-              {link.tags.slice(0, 3).map((tag) => (
-                <span key={tag} className="text-[11px] font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded-md border border-primary/5">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
+        
+        <div className="flex items-center gap-2">
+          <p className="text-xs font-mono text-text-muted truncate max-w-[200px] sm:max-w-md">{domain}</p>
         </div>
       </div>
+
+      <div className="hidden sm:flex items-center gap-3 shrink-0">
+        {category && (
+           <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] uppercase font-medium bg-surface-2 text-text-muted border border-border/30">
+             {category.name}
+           </span>
+        )}
+        <div className="flex items-center gap-1 text-text-faint text-xs w-20 justify-end">
+          <span className="material-symbols-outlined text-[12px]">visibility</span>
+          <span>{link.visitCount} visits</span>
+        </div>
       </div>
 
-      <div className="flex items-center justify-between sm:justify-end gap-0.5 opacity-100 sm:opacity-0 sm:translate-x-2 sm:group-hover:opacity-100 sm:group-hover:translate-x-0 transition-all duration-200 pt-2 sm:pt-0 border-t border-border/40 sm:border-0 mt-1 sm:mt-0">
+      <div className="flex items-center opacity-100 transition-opacity bg-surface sm:bg-transparent pl-2 shrink-0">
         <button
           type="button"
-          onClick={onFavorite}
+          onClick={(e) => { e.preventDefault(); onFavorite(); }}
           className={cn(
-            "p-2 rounded-md transition-colors hover:bg-secondary",
-            link.isFavorite ? "text-rose-500" : "text-muted-foreground hover:text-foreground"
+            "p-1.5 rounded-md transition-colors",
+            link.isFavorite ? "text-danger" : "text-text-muted hover:text-text hover:bg-surface-2"
           )}
           title="Save to Favorites"
         >
-          <Heart size={16} fill={link.isFavorite ? "currentColor" : "none"} strokeWidth={2} />
+          <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: link.isFavorite ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
         </button>
         <button
           type="button"
-          onClick={onRemind}
+          onClick={(e) => { e.preventDefault(); onRemind(); }}
           className={cn(
-            "p-2 rounded-md transition-colors hover:bg-secondary",
-            hasReminder ? "text-primary" : "text-muted-foreground hover:text-foreground"
+            "p-1.5 rounded-md transition-colors",
+            hasReminder ? "text-accent" : "text-text-muted hover:text-text hover:bg-surface-2"
           )}
           title="Set Reminder"
         >
-          <Bell size={16} strokeWidth={2} />
+          <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: hasReminder ? "'FILL' 1" : "'FILL' 0" }}>notifications</span>
         </button>
         <button
           type="button"
           onClick={handleCopy}
-          className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+          className="p-1.5 rounded-md text-text-muted hover:text-text hover:bg-surface-2 transition-colors"
           title="Copy Link"
         >
-          <Copy size={16} strokeWidth={2} />
+          <span className="material-symbols-outlined text-[18px]">content_copy</span>
         </button>
         <button
           type="button"
-          onClick={onEdit}
-          className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+          onClick={(e) => { e.preventDefault(); onEdit(); }}
+          className="p-1.5 rounded-md text-text-muted hover:text-text hover:bg-surface-2 transition-colors"
           title="Edit Link"
         >
-          <Pencil size={16} strokeWidth={2} />
+          <span className="material-symbols-outlined text-[18px]">edit</span>
         </button>
-        <div className="mx-1 h-5 w-px bg-border/60" />
+        <div className="w-px h-4 bg-border mx-1" />
         <button
           type="button"
-          onClick={onDelete}
-          className="p-2 rounded-md text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-colors"
+          onClick={(e) => { e.preventDefault(); onDelete(); }}
+          className="p-1.5 rounded-md text-text-muted hover:text-danger hover:bg-danger/10 transition-colors"
           title="Delete Link"
         >
-          <Trash2 size={16} strokeWidth={2} />
+          <span className="material-symbols-outlined text-[18px]">delete</span>
         </button>
       </div>
     </article>

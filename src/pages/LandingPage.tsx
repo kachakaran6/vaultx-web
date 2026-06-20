@@ -2,7 +2,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { Shield, Download, Github } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "../components/ui/Button";
+import { Button } from "../components/ui/button";
 import { Container } from "../components/ui/Container";
 import { HeroSection } from "../components/landing/HeroSection";
 import { FeatureGrid } from "../components/landing/FeatureGrid";
@@ -54,7 +54,7 @@ function Navbar() {
               Sign In
             </Button>
             <Link to="/home">
-              <Button variant="primary" size="md" className="shadow-neu-soft">
+              <Button variant="default" size="sm" className="shadow-neu-soft">
                 Launch App
               </Button>
             </Link>
@@ -129,7 +129,7 @@ function FinalCTA() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/home">
-                <Button size="xl" variant="primary" className="w-full shadow-glow-primary">
+                <Button size="lg" variant="default" className="w-full shadow-glow-primary">
                   Open Digital Vault Now
                 </Button>
               </Link>

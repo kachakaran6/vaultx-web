@@ -30,19 +30,19 @@ export function ModalShell({
             onClick={onClose}
           />
           <motion.div
-            className={`relative w-full ${widthClassName} rounded-xl border border-border bg-card shadow-2xl overflow-hidden transition-all`}
+            className={`relative w-full ${widthClassName} rounded-xl border border-border bg-surface shadow-2xl overflow-hidden transition-all`}
             initial={{ opacity: 0, scale: 0.98, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, y: 10 }}
             transition={{ type: "spring", damping: 25, stiffness: 350 }}
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-6 py-5 border-b border-border">
-              <h2 className="text-[17px] font-semibold text-foreground tracking-tight">{title}</h2>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+              <h2 className="text-lg font-semibold text-text tracking-tight">{title}</h2>
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                className="p-1.5 rounded-md text-text-muted hover:text-text hover:bg-surface-2 transition-colors"
               >
                 <X size={18} strokeWidth={2.5} />
               </button>
@@ -51,7 +51,7 @@ export function ModalShell({
             <div className="max-h-[80vh] overflow-y-auto px-6 py-6 hide-scrollbar">{children}</div>
 
             {footer && (
-              <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border bg-secondary/30">
+              <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border bg-surface-2/50">
                 {footer}
               </div>
             )}

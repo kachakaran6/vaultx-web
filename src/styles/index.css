@@ -4,185 +4,161 @@
 
 @layer base {
   :root {
-    /* System Scale Base Values */
-    --radius-card: 12px;
-    --radius-element: 10px;
-    --primary-h: 225;
-    --primary-s: 100%;
-    --primary-l: 65%;
+    --bg: #FAFAFA;
+    --surface: #FFFFFF;
+    --surface-2: #F4F4F5;
+    --border: #E4E4E7;
+    --text: #18181B;
+    --text-muted: #71717A;
+    --text-faint: #A1A1AA;
+
+    --accent: #6366F1;
+    --accent-hover: #4F46E5;
+    --accent-soft: #EEF0FF;
+
+    --success: #10B981;
+    --danger: #EF4444;
+    --warning: #F59E0B;
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
   }
 
-  /* ───────────────────────────────────────────────────────
-     PREMIUM FLAT PALETTE (LIGHT MODE)
-     ─────────────────────────────────────────────────────── */
-  :root,
-  :root[data-theme="light"] {
-    --background: 227 33% 97.6%; /* #F6F7FB */
-    --foreground: 221 39% 11%;    /* #111827 */
-    
-    --card: 0 0% 100%;          /* #FFFFFF */
-    --card-foreground: 221 39% 11%;
-    
-    --primary: 225 100% 65%;      /* #4F7CFF */
-    --primary-foreground: 0 0% 100%;
-    
-    --secondary: 223 29% 96.1%;   /* #F1F3F8 */
-    --secondary-foreground: 220 9% 46%; /* #6B7280 */
-    
-    --muted: 223 29% 96.1%;
-    --muted-foreground: 220 9% 46%;
-    
-    --accent: 225 100% 65%;
-    --accent-foreground: 221 39% 11%;
-    
-    --destructive: 0 84% 60%;     /* #EF4444 */
-    --destructive-foreground: 0 0% 100%;
-    
-    --border: 220 13% 91%;        /* #E5E7EB */
-    --input: 220 13% 91%;
-    --ring: 225 100% 65%;
+  .dark {
+    --bg: #0A0A0B;
+    --surface: #131316;
+    --surface-2: #1C1C1F;
+    --border: #26262B;
+    --text: #F4F4F5;
+    --text-muted: #9A9AA2;
+    --text-faint: #6B6B72;
+
+    --success: #10B981;
+    --danger: #EF4444;
+    --warning: #F59E0B;
   }
 
-  /* ───────────────────────────────────────────────────────
-     PREMIUM FLAT PALETTE (DARK MODE)
-     ─────────────────────────────────────────────────────── */
-  :root[data-theme="dark"] {
-    --background: 222 47% 4%;
-    --foreground: 210 40% 98%;
-    
-    --card: 222 47% 8%;
-    --card-foreground: 210 40% 98%;
-    
-    --primary: 225 100% 65%;
-    --primary-foreground: 0 0% 100%;
-    
-    --secondary: 217 32% 15%;
-    --secondary-foreground: 215 20% 75%;
-    
-    --muted: 217 32% 12%;
-    --muted-foreground: 215 20% 65%;
-    
-    --accent: 225 100% 65%;
-    --accent-foreground: 210 40% 98%;
-    
-    --destructive: 0 62% 40%;
-    --destructive-foreground: 210 40% 98%;
-    
-    --border: 217 32% 16%;
-    --input: 217 32% 16%;
-    --ring: 225 100% 65%;
+  /* Accent Colors */
+  :root, :root[data-accent="blue"] {
+    --accent: #2563EB;
+    --accent-hover: #1D4ED8;
+    --accent-soft: #EFF6FF;
+  }
+  .dark, .dark[data-accent="blue"] {
+    --accent-soft: #2563eb26;
   }
 
-  /* ACCENT OVERRIDES - Softened to match the minimal styling */
-  :root[data-accent="blue"] { --primary: 225 100% 65%; }
-  :root[data-accent="purple"] { --primary: 250 89% 74%; }
-  :root[data-accent="emerald"] { --primary: 142 71% 45%; }
-  :root[data-accent="orange"] { --primary: 38 92% 50%; }
-  :root[data-accent="pink"] { --primary: 330 81% 60%; }
-  :root[data-accent="slate"] { --primary: 220 9% 46%; }
+  :root[data-accent="purple"] {
+    --accent: #9333EA;
+    --accent-hover: #7E22CE;
+    --accent-soft: #F3E8FF;
+  }
+  .dark[data-accent="purple"] {
+    --accent-soft: #9333ea26;
+  }
+
+  :root[data-accent="emerald"] {
+    --accent: #10B981;
+    --accent-hover: #059669;
+    --accent-soft: #ECFDF5;
+  }
+  .dark[data-accent="emerald"] {
+    --accent-soft: #10b98126;
+  }
+
+  :root[data-accent="orange"] {
+    --accent: #F97316;
+    --accent-hover: #EA580C;
+    --accent-soft: #FFF7ED;
+  }
+  .dark[data-accent="orange"] {
+    --accent-soft: #f9731626;
+  }
+
+  :root[data-accent="pink"] {
+    --accent: #EC4899;
+    --accent-hover: #DB2777;
+    --accent-soft: #FDF2F8;
+  }
+  .dark[data-accent="pink"] {
+    --accent-soft: #ec489926;
+  }
+
+  :root[data-accent="slate"] {
+    --accent: #64748B;
+    --accent-hover: #475569;
+    --accent-soft: #F8FAFC;
+  }
+  .dark[data-accent="slate"] {
+    --accent-soft: #64748b26;
+  }
 }
 
 @layer base {
   * {
-    @apply border-border selection:bg-primary/20;
+    border-color: var(--border);
     transition-property: background-color, border-color, color, box-shadow;
-    transition-duration: 200ms;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  html {
-    scroll-behavior: smooth;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    @apply bg-background;
-  }
-  
-  body {
-    @apply bg-background text-foreground antialiased overflow-x-hidden;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
-    min-height: 100vh;
+    transition-duration: 150ms;
+    transition-timing-function: ease;
   }
 
-  /* Standard Typography Hierarchy for Modern Productivity Workspace */
-  h1 { @apply text-4xl font-bold tracking-[-0.03em] text-foreground; }
-  h2 { @apply text-xl font-semibold tracking-[-0.01em] text-foreground; }
-  h3 { @apply text-lg font-medium text-foreground; }
-  p { @apply text-[14px] leading-relaxed; }
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    @apply font-sans antialiased overflow-x-hidden;
+  }
+
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    display: inline-block;
+    line-height: 1;
+    vertical-align: middle;
+  }
 }
 
 @layer utilities {
-  .text-primary-accent {
-    color: hsl(var(--primary));
-  }
-  
-  .bg-subtle {
-    background-color: rgba(79, 124, 255, 0.12);
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
   }
 
-  /* Clean elegant container class */
-  .card-base {
-    @apply bg-card border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200;
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
   }
 
-  .input-base {
-    @apply h-[44px] px-4 rounded-md border border-border bg-card outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all;
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--outline-variant);
+    border-radius: 10px;
   }
 
-  .btn-base {
-    @apply h-[42px] px-5 inline-flex items-center justify-center font-medium rounded-md transition-all active:scale-[0.98];
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--outline);
+  }
+
+  .sidebar-active-line {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--primary);
   }
 
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
   .hide-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-
-  /* Modern thin scrollbar */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: hsl(var(--border));
-    border-radius: 10px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--secondary-foreground) / 0.3);
-  }
-}
-
-/* ───────────────────────────────────────────────────────
-   RESPONSIVE OPTIMIZATIONS & PERFORMANCE OVERRIDES
-   ─────────────────────────────────────────────────────── */
-
-@media (max-width: 768px) {
-  h1 { font-size: 1.75rem !important; letter-spacing: -0.02em !important; }
-  h2 { font-size: 1.15rem !important; }
-  
-  /* Disable expensive background transitions to boost FPS on mobile scrolls */
-  * {
-    transition-duration: 150ms !important;
-  }
-  
-  /* Touch specific dynamic click surface extensions */
-  button, a {
-    min-height: 32px;
-    touch-action: manipulation; /* Eliminate 300ms tap delay */
-  }
-
-  /* Native look momentum scrolling */
-  .overflow-y-auto {
-    -webkit-overflow-scrolling: touch;
-  }
-}
-
-/* Support for devices with software Home Bars (iPhone X+, modern Android) */
-body {
-  padding-bottom: env(safe-area-inset-bottom, 0);
 }

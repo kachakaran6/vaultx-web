@@ -19,6 +19,8 @@ import { StatsPage } from "./pages/StatsPage";
 import { SyncPage } from "./pages/SyncPage";
 import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
 import { ClusterPage } from "./pages/ClusterPage";
+import { BoardGalleryPage } from "./pages/BoardGalleryPage";
+import { BoardWorkspacePage } from "./pages/BoardWorkspacePage";
 import { useAppStore } from "./store/app-store";
 
 function LoadingScreen() {
@@ -54,6 +56,8 @@ export default function App() {
             <Route element={<AppShell />}>
               <Route path="/home" element={<HomePage />} />
               <Route path="/categories" element={<CategoriesPage />} />
+              <Route path="/boards" element={<BoardGalleryPage />} />
+              <Route path="/boards/:id" element={<BoardWorkspacePage />} />
               <Route path="/stats" element={<StatsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>

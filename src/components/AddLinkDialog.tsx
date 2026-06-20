@@ -92,7 +92,7 @@ export function AddLinkDialog() {
     }
   };
 
-  const inputBase = "w-full h-11 px-3.5 rounded-lg border border-border bg-secondary/40 dark:bg-secondary/20 text-[14px] text-foreground outline-none focus:border-primary/60 focus:ring-4 focus:ring-primary/5 transition-all placeholder:text-muted-foreground/70 font-medium shadow-sm";
+  const inputBase = "w-full h-9 px-3 rounded-md border border-border bg-surface text-sm text-text outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all placeholder:text-text-faint font-medium shadow-sm";
 
   return (
     <ModalShell
@@ -112,7 +112,7 @@ export function AddLinkDialog() {
             form="vault-link-form"
             type="submit"
             disabled={saving}
-            className="h-10 px-6 rounded-md bg-primary text-white text-[13px] font-bold transition-all hover:opacity-90 disabled:opacity-50 shadow-sm"
+            className="h-9 px-4 rounded-md bg-accent text-surface text-sm font-semibold transition-all hover:brightness-110 disabled:opacity-50 shadow-sm"
           >
             {saving ? "Saving..." : "Confirm"}
           </button>
@@ -123,9 +123,9 @@ export function AddLinkDialog() {
         <div className="space-y-4">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-[13px] font-semibold text-foreground">URL address</label>
+              <label className="text-xs font-semibold text-text uppercase tracking-wider">URL address</label>
               {fetching && (
-                <div className="flex items-center gap-1.5 text-[12px] font-medium text-primary animate-pulse">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-accent animate-pulse">
                   <Loader2 size={12} className="animate-spin" />
                   Fetching...
                 </div>
@@ -142,7 +142,7 @@ export function AddLinkDialog() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[13px] font-semibold text-foreground">Display title</label>
+            <label className="text-xs font-semibold text-text uppercase tracking-wider">Display title</label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -159,7 +159,7 @@ export function AddLinkDialog() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label className="text-[13px] font-semibold text-foreground">Tags (comma separated)</label>
+              <label className="text-xs font-semibold text-text uppercase tracking-wider">Tags (comma separated)</label>
               <input
                 value={tagsInput}
                 onChange={(e) => setTagsInput(e.target.value)}
@@ -169,7 +169,7 @@ export function AddLinkDialog() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[13px] font-semibold text-foreground">Collection</label>
+              <label className="text-xs font-semibold text-text uppercase tracking-wider">Collection</label>
               <select
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
@@ -188,7 +188,7 @@ export function AddLinkDialog() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[13px] font-semibold text-foreground">Notes</label>
+            <label className="text-xs font-semibold text-text uppercase tracking-wider">Notes</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -205,7 +205,7 @@ export function AddLinkDialog() {
             </div>
             <div className={cn(
               "w-5 h-5 rounded border transition-all flex items-center justify-center",
-              isFavorite ? "bg-primary border-primary text-white" : "border-border bg-background"
+              isFavorite ? "bg-accent border-accent text-surface" : "border-border bg-surface"
             )}>
               {isFavorite && <Check size={14} strokeWidth={3} />}
             </div>

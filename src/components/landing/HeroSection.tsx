@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Shield, Link2, Zap, ArrowRight, FolderLock } from "lucide-react";
-import { Button } from "../ui/Button";
+import { Button } from "../ui/button";
 import { Container } from "../ui/Container";
 import { Badge } from "../ui/Badge";
 
@@ -51,10 +51,12 @@ export function HeroSection() {
             transition={{ duration: 0.6, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 w-full sm:w-auto mb-20"
           >
-            <Button size="xl" variant="primary" className="w-full sm:w-auto" rightIcon={<ArrowRight size={20} />}>
+            <Button size="lg" variant="default" className="w-full sm:w-auto gap-2">
               Launch Web App
+              <ArrowRight size={20} />
             </Button>
-            <Button size="xl" variant="neu" className="w-full sm:w-auto" leftIcon={<FolderLock size={20} />}>
+            <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2">
+              <FolderLock size={20} />
               Discover Features
             </Button>
           </motion.div>

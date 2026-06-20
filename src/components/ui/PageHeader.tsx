@@ -11,25 +11,25 @@ interface PageHeaderProps {
 
 export function PageHeader({ eyebrow, title, description, actions, className }: PageHeaderProps) {
   return (
-    <header className={cn("flex flex-col md:flex-row md:items-end justify-between gap-6 mb-7 animate-in fade-in duration-500", className)}>
-      <div className="space-y-1.5">
+    <header className={cn("flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6 animate-in fade-in duration-300", className)}>
+      <div className="flex flex-col gap-2">
         {eyebrow && (
-          <span className="block text-[12px] font-semibold tracking-wider text-muted-foreground/70 uppercase">
+          <span className="text-xs font-semibold tracking-wide text-text-faint uppercase">
             {eyebrow}
           </span>
         )}
-        <h1 className="text-[32px] font-[650] tracking-[-0.03em] leading-[1.1] text-foreground">
+        <h1 className="text-xl font-semibold text-text tracking-tight leading-none">
           {title}
         </h1>
         {description && (
-          <p className="text-[14px] font-normal text-muted-foreground leading-relaxed max-w-2xl">
+          <p className="text-sm text-text-muted">
             {description}
           </p>
         )}
       </div>
       
       {actions && (
-        <div className="flex items-center gap-3 shrink-0 md:pb-1">
+        <div className="flex items-center gap-3 shrink-0 h-9">
           {actions}
         </div>
       )}

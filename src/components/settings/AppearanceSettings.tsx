@@ -25,8 +25,8 @@ export function AppearanceSettings() {
     <div className="space-y-6">
       {/* Theme Selection */}
       <div className="space-y-2.5">
-        <label className="text-[12px] font-semibold text-muted-foreground">Interface Theme</label>
-        <div className="flex p-1 bg-secondary/60 rounded-md w-full border border-border/60 relative">
+        <label className="text-sm font-medium text-text">Interface Theme</label>
+        <div className="flex p-1 bg-surface-2 rounded-lg w-full max-w-sm relative">
           {THEMES.map((t) => {
             const isActive = theme === t.id;
             const Icon = t.icon;
@@ -35,14 +35,14 @@ export function AppearanceSettings() {
                 key={t.id}
                 onClick={() => setTheme(t.id)}
                 className={cn(
-                  "relative flex items-center justify-center flex-1 h-9 rounded-sm text-[13px] font-medium transition-all z-10 gap-2",
-                  isActive ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
+                  "relative flex items-center justify-center flex-1 h-8 rounded-md text-sm font-medium transition-all z-10 gap-2",
+                  isActive ? "text-text font-semibold" : "text-text-muted hover:text-text"
                 )}
               >
                 {isActive && (
                   <motion.div
                     layoutId="activeThemeCompact"
-                    className="absolute inset-0 bg-card rounded-sm shadow-sm border border-border/60 z-[-1]"
+                    className="absolute inset-0 bg-surface rounded-md shadow-sm border border-border z-[-1]"
                     transition={{ type: "spring", bounce: 0.1, duration: 0.3 }}
                   />
                 )}
@@ -55,16 +55,16 @@ export function AppearanceSettings() {
       </div>
 
       {/* Accent Palette */}
-      <div className="space-y-2.5">
-        <label className="text-[12px] font-semibold text-muted-foreground">Accent Color</label>
-        <div className="grid grid-cols-6 gap-3">
+      <div className="space-y-3">
+        <label className="text-sm font-medium text-text">Accent Color</label>
+        <div className="flex flex-wrap gap-3">
           {ACCENTS.map((a) => {
             const isSelected = accent === a.id;
             return (
               <button
                 key={a.id}
                 onClick={() => setAccent(a.id)}
-                className="group relative flex items-center justify-center outline-none aspect-square cursor-pointer"
+                className="group relative flex items-center justify-center outline-none w-7 h-7 cursor-pointer"
                 title={a.label}
               >
                 <div

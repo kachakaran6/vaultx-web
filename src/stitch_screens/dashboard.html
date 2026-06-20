@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vault X Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-variant": "#34343d",
+                      "outline-variant": "#464554",
+                      "tertiary-fixed": "#ffdcc5",
+                      "tertiary-fixed-dim": "#ffb783",
+                      "on-primary-container": "#0d0096",
+                      "background": "#13131b",
+                      "on-primary-fixed": "#07006c",
+                      "tertiary-container": "#d97721",
+                      "secondary": "#b9c8de",
+                      "primary": "#c0c1ff",
+                      "on-background": "#e4e1ed",
+                      "error": "#ffb4ab",
+                      "tertiary": "#ffb783",
+                      "surface-bright": "#393841",
+                      "surface-tint": "#c0c1ff",
+                      "on-tertiary": "#4f2500",
+                      "on-surface": "#e4e1ed",
+                      "secondary-fixed": "#d4e4fa",
+                      "surface-container-lowest": "#0d0d15",
+                      "inverse-surface": "#e4e1ed",
+                      "primary-fixed": "#e1e0ff",
+                      "secondary-fixed-dim": "#b9c8de",
+                      "on-tertiary-fixed-variant": "#703700",
+                      "inverse-primary": "#494bd6",
+                      "on-secondary-fixed": "#0d1c2d",
+                      "surface-container-low": "#1b1b23",
+                      "surface-container": "#1f1f27",
+                      "primary-fixed-dim": "#c0c1ff",
+                      "on-primary-fixed-variant": "#2f2ebe",
+                      "on-secondary": "#233143",
+                      "on-error-container": "#ffdad6",
+                      "primary-container": "#8083ff",
+                      "surface-container-high": "#292932",
+                      "on-error": "#690005",
+                      "error-container": "#93000a",
+                      "on-primary": "#1000a9",
+                      "secondary-container": "#39485a",
+                      "outline": "#908fa0",
+                      "on-tertiary-container": "#452000",
+                      "surface-container-highest": "#34343d",
+                      "on-surface-variant": "#c7c4d7",
+                      "on-secondary-fixed-variant": "#39485a",
+                      "inverse-on-surface": "#303038",
+                      "on-tertiary-fixed": "#301400",
+                      "surface": "#13131b",
+                      "surface-dim": "#13131b",
+                      "on-secondary-container": "#a7b6cc"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "container-padding": "32px",
+                      "grid-gutter": "16px",
+                      "stack-xs": "4px",
+                      "stack-sm": "8px",
+                      "sidebar-width": "260px",
+                      "stack-md": "12px",
+                      "stack-lg": "24px"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "label-caps": [
+                              "JetBrains Mono"
+                      ],
+                      "display-sm": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "code-sm": [
+                              "JetBrains Mono"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-caps": [
+                              "11px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "display-sm": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-sm": [
+                              "13px",
+                              {
+                                      "lineHeight": "18px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "code-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+        }
+        .masonry-grid {
+            column-count: 1;
+            column-gap: theme('spacing.grid-gutter');
+        }
+        @media (min-width: 768px) {
+            .masonry-grid { column-count: 2; }
+        }
+        @media (min-width: 1024px) {
+            .masonry-grid { column-count: 3; }
+        }
+        @media (min-width: 1280px) {
+            .masonry-grid { column-count: 4; }
+        }
+        .masonry-item {
+            break-inside: avoid;
+            margin-bottom: theme('spacing.grid-gutter');
+        }
+        
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: theme('colors.surface-container-lowest'); 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: theme('colors.surface-variant'); 
+            border-radius: theme('borderRadius.full');
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: theme('colors.outline-variant'); 
+        }
+    </style>
+</head>
+<body class="flex min-h-screen bg-background text-on-background font-body-md overflow-hidden selection:bg-primary selection:text-on-primary">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col w-sidebar-width h-screen fixed left-0 top-0 bg-surface-container-low dark:bg-surface-container-lowest border-r border-outline-variant dark:border-outline-variant py-stack-lg z-50">
+<div class="px-4 mb-8 flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-bold">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">dataset</span>
+</div>
+<div class="font-headline-md text-headline-md font-bold text-on-surface dark:text-on-surface tracking-tight">Vault X</div>
+</div>
+<div class="flex-1 flex flex-col gap-1 px-2 overflow-y-auto">
+<!-- Active Tab: Home -->
+<a class="flex items-center gap-stack-md px-4 py-3 border-l-2 border-primary bg-primary-container/10 text-primary font-bold hover:bg-surface-variant/50 transition-colors duration-200 cursor-pointer active:scale-95 group rounded-r-lg" href="#">
+<span class="material-symbols-outlined text-[20px] transition-transform group-hover:scale-110" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-body-md text-body-md">Home</span>
+</a>
+<a class="flex items-center gap-stack-md px-4 py-3 text-on-surface-variant hover:text-on-surface border-l-2 border-transparent hover:bg-surface-variant/50 transition-colors duration-200 cursor-pointer active:scale-95 group rounded-r-lg" href="#">
+<span class="material-symbols-outlined text-[20px] transition-transform group-hover:scale-110">category</span>
+<span class="font-body-md text-body-md">Categories</span>
+</a>
+<a class="flex items-center gap-stack-md px-4 py-3 text-on-surface-variant hover:text-on-surface border-l-2 border-transparent hover:bg-surface-variant/50 transition-colors duration-200 cursor-pointer active:scale-95 group rounded-r-lg" href="#">
+<span class="material-symbols-outlined text-[20px] transition-transform group-hover:scale-110">insights</span>
+<span class="font-body-md text-body-md">Analytics</span>
+</a>
+<a class="flex items-center gap-stack-md px-4 py-3 text-on-surface-variant hover:text-on-surface border-l-2 border-transparent hover:bg-surface-variant/50 transition-colors duration-200 cursor-pointer active:scale-95 group rounded-r-lg" href="#">
+<span class="material-symbols-outlined text-[20px] transition-transform group-hover:scale-110">settings</span>
+<span class="font-body-md text-body-md">Settings</span>
+</a>
+</div>
+<!-- User Profile Footer -->
+<div class="mt-auto px-4 pt-4 border-t border-outline-variant/30 mx-2">
+<div class="flex items-center justify-between p-2 rounded-lg hover:bg-surface-variant/30 transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<img alt="User profile" class="w-8 h-8 rounded-full border border-outline-variant object-cover" data-alt="A minimalist abstract profile avatar with geometric dark mode elements, deep navy background with a bright indigo accent shape, flat design, high quality." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSzD7FDI-He-KzqGdc0QFLoiFHUNsjAWVrVGe1Vu8T0u98DVAmzycZPTU4bFmpIu8O-x3icxZ-9PeVp93idFE-iO8kvcBmPU4G_0MgHfElYqUV_Wyc83h2_-xI1_rx1nK1XEDEvSzYYOoAGECO4nFXdgFzRzdSaTNwAP7hlON8xa2Zg7eWFHq3B8n-obAY-LYbHIynh_by9uFUwLrEmyNXYSXoHPjJhvZVeOSKYcUWY3c9-fOUVWI2ICle0DvyxsSJL8blQBV4Nns"/>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm font-medium text-on-surface">User Name</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Pro Plan</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-sm group-hover:text-primary transition-colors">more_vert</span>
+</div>
+<button class="w-full mt-3 py-2 px-4 rounded-lg bg-surface-variant/50 border border-outline-variant text-on-surface-variant font-label-caps text-label-caps hover:bg-primary hover:text-white hover:border-primary transition-all duration-200 flex justify-center items-center gap-2">
+<span class="material-symbols-outlined text-[14px]">bolt</span>
+                Upgrade
+            </button>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-sidebar-width flex flex-col h-screen relative bg-surface dark:bg-surface">
+<!-- TopNavBar -->
+<header class="h-16 sticky top-0 z-40 bg-surface/80 backdrop-blur-md border-b border-outline-variant dark:border-outline-variant flex items-center justify-between px-container-padding w-full">
+<!-- Left Side: Search -->
+<div class="flex-1 max-w-md relative group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="w-full bg-surface-container-low border border-outline-variant text-body-sm font-body-sm text-on-surface placeholder-on-surface-variant/50 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all shadow-sm" placeholder="Search links, categories, or tags..." type="text"/>
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+<kbd class="hidden sm:inline-block font-code-sm text-[10px] text-on-surface-variant/70 border border-outline-variant/50 rounded px-1.5 py-0.5 bg-surface-container-lowest">⌘K</kbd>
+</div>
+</div>
+<!-- Right Side: Actions -->
+<div class="flex items-center gap-4 ml-4">
+<div class="flex items-center gap-1">
+<button class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 relative">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border border-surface"></span>
+</button>
+<button class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50">
+<span class="material-symbols-outlined text-[20px]">help</span>
+</button>
+</div>
+<div class="w-px h-6 bg-outline-variant/50 mx-1"></div>
+<button class="flex items-center gap-2 bg-primary hover:bg-primary-fixed-dim text-on-primary font-body-sm text-body-sm font-medium py-2 px-4 rounded-lg transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-surface focus:ring-primary">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    Add Link
+                </button>
+<!-- Mobile Menu Trigger -->
+<button class="md:hidden w-9 h-9 flex items-center justify-center text-on-surface-variant ml-2">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</header>
+<!-- Scrollable Canvas -->
+<div class="flex-1 overflow-y-auto px-container-padding py-8">
+<div class="max-w-[1600px] mx-auto">
+<!-- Header Section -->
+<div class="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
+<div>
+<h1 class="font-display-sm text-display-sm text-on-surface">Recent Links</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Manage and organize your saved items.</p>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-md border border-outline-variant text-on-surface-variant text-body-sm font-body-sm hover:bg-surface-variant/30 hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[16px]">filter_list</span>
+                            Filter
+                        </button>
+<button class="flex items-center gap-2 px-3 py-1.5 rounded-md border border-outline-variant text-on-surface-variant text-body-sm font-body-sm hover:bg-surface-variant/30 hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[16px]">sort</span>
+                            Sort
+                        </button>
+</div>
+</div>
+<!-- Masonry Grid -->
+<div class="flex flex-col gap-2">
+<!-- List Item 1: GitHub -->
+<div class="flex items-center gap-4 p-4 bg-surface-container-low border border-outline-variant rounded-xl hover:border-primary/50 hover:bg-surface-variant/30 transition-all duration-200 group cursor-pointer">
+<div class="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center border border-outline-variant/50 shrink-0">
+<svg class="w-6 h-6 text-on-surface" fill="currentColor" viewbox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-headline-md text-[16px] text-on-surface font-semibold truncate group-hover:text-primary transition-colors">Vault X Repository</h3>
+<p class="font-code-sm text-code-sm text-on-surface-variant/70 truncate">github.com/vaultx/core-app</p>
+</div>
+<div class="hidden sm:flex items-center gap-3 shrink-0">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-label-caps font-medium bg-surface-variant/80 text-on-surface-variant border border-outline-variant/30">Productivity</span>
+<div class="flex items-center gap-1 text-on-surface-variant/60 text-[11px] font-body-sm">
+<span class="material-symbols-outlined text-[12px]">visibility</span>
+<span>42 visits</span>
+</div>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface p-1 shrink-0">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+<!-- List Item 2: Dribbble -->
+<div class="flex items-center gap-4 p-4 bg-surface-container-low border border-outline-variant rounded-xl hover:border-primary/50 hover:bg-surface-variant/30 transition-all duration-200 group cursor-pointer">
+<div class="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center border border-outline-variant/50 shrink-0">
+<span class="material-symbols-outlined text-tertiary-container" style="font-variation-settings: 'FILL' 1;">sports_basketball</span>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-headline-md text-[16px] text-on-surface font-semibold truncate group-hover:text-primary transition-colors">Dark Mode Dashboard Inspiration</h3>
+<p class="font-code-sm text-code-sm text-on-surface-variant/70 truncate">dribbble.com/shots/dark-mode-ui</p>
+</div>
+<div class="hidden sm:flex items-center gap-3 shrink-0">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-label-caps font-medium bg-surface-variant/80 text-on-surface-variant border border-outline-variant/30">Design</span>
+<div class="flex items-center gap-1 text-on-surface-variant/60 text-[11px] font-body-sm">
+<span class="material-symbols-outlined text-[12px]">visibility</span>
+<span>18 visits</span>
+</div>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface p-1 shrink-0">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+<!-- List Item 3: Linear -->
+<div class="flex items-center gap-4 p-4 bg-surface-container-low border border-outline-variant rounded-xl hover:border-primary/50 hover:bg-surface-variant/30 transition-all duration-200 group cursor-pointer">
+<div class="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center border border-outline-variant/50 shrink-0">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">timeline</span>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-headline-md text-[16px] text-on-surface font-semibold truncate group-hover:text-primary transition-colors">Q3 Product Roadmap - Vault X</h3>
+<p class="font-code-sm text-code-sm text-on-surface-variant/70 truncate">linear.app/vaultx/project/q3</p>
+</div>
+<div class="hidden sm:flex items-center gap-3 shrink-0">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-label-caps font-medium bg-surface-variant/80 text-on-surface-variant border border-outline-variant/30">Productivity</span>
+<div class="flex items-center gap-1 text-on-surface-variant/60 text-[11px] font-body-sm">
+<span class="material-symbols-outlined text-[12px]">visibility</span>
+<span>89 visits</span>
+</div>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface p-1 shrink-0">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+<!-- List Item 4: Tailwind CSS -->
+<div class="flex items-center gap-4 p-4 bg-surface-container-low border border-outline-variant rounded-xl hover:border-primary/50 hover:bg-surface-variant/30 transition-all duration-200 group cursor-pointer">
+<div class="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center border border-outline-variant/50 shrink-0">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-headline-md text-[16px] text-on-surface font-semibold truncate group-hover:text-primary transition-colors">Tailwind CSS Documentation</h3>
+<p class="font-code-sm text-code-sm text-on-surface-variant/70 truncate">tailwindcss.com/docs/grid-auto-columns</p>
+</div>
+<div class="hidden sm:flex items-center gap-3 shrink-0">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-label-caps font-medium bg-surface-variant/80 text-on-surface-variant border border-outline-variant/30">Design</span>
+<div class="flex items-center gap-1 text-on-surface-variant/60 text-[11px] font-body-sm">
+<span class="material-symbols-outlined text-[12px]">visibility</span>
+<span>156 visits</span>
+</div>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface p-1 shrink-0">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+<!-- List Item 5: Stripe -->
+<div class="flex items-center gap-4 p-4 bg-surface-container-low border border-outline-variant rounded-xl hover:border-primary/50 hover:bg-surface-variant/30 transition-all duration-200 group cursor-pointer">
+<div class="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center border border-outline-variant/50 shrink-0">
+<span class="material-symbols-outlined text-primary-fixed" style="font-variation-settings: 'FILL' 1;">payments</span>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-headline-md text-[16px] text-on-surface font-semibold truncate group-hover:text-primary transition-colors">Stripe API Reference</h3>
+<p class="font-code-sm text-code-sm text-on-surface-variant/70 truncate">stripe.com/docs/api/subscriptions</p>
+</div>
+<div class="hidden sm:flex items-center gap-3 shrink-0">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-label-caps font-medium bg-surface-variant/80 text-on-surface-variant border border-outline-variant/30">Development</span>
+<div class="flex items-center gap-1 text-on-surface-variant/60 text-[11px] font-body-sm">
+<span class="material-symbols-outlined text-[12px]">visibility</span>
+<span>12 visits</span>
+</div>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface p-1 shrink-0">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Load More / End State -->
+<div class="mt-8 flex justify-center pb-12">
+<div class="inline-flex items-center gap-2 px-4 py-2 bg-surface-container rounded-full border border-outline-variant/30 text-on-surface-variant text-body-sm font-body-sm">
+<div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+                        Showing 5 of 128 saved links
+                    </div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

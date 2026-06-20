@@ -102,4 +102,28 @@ export interface ImportSummary {
   linksMerged: number;
   categoriesAdded: number;
   remindersAdded: number;
+  boardsAdded?: number;
+}
+
+export type BoardBackground = 'minimal' | 'grid' | 'dots' | 'paper' | 'blueprint' | 'glass' | 'dark-noise' | 'gradient' | 'aurora' | 'galaxy' | 'notebook';
+
+export interface BoardRecord {
+  id: string;
+  name: string;
+  description: string;
+  emoji: string;
+  cover: string;
+  background: BoardBackground;
+  nodes: any[]; // React Flow Nodes
+  edges: any[]; // React Flow Edges
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface BoardDraft {
+  name: string;
+  description: string;
+  emoji: string;
+  cover: string;
+  background: BoardBackground;
 }

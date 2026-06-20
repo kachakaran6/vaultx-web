@@ -71,9 +71,9 @@ function SortableItem({
             type="button"
             {...attributes}
             {...listeners}
-            className="mt-2 rounded-xl border border-vault-border bg-vault-elevated p-2 text-vault-hint"
+            className="mt-2 rounded-md border border-border bg-surface-2 p-2 text-text-faint hover:text-text cursor-grab active:cursor-grabbing transition-colors"
           >
-            <GripVertical size={15} />
+            <GripVertical size={16} />
           </button>
         }
       />

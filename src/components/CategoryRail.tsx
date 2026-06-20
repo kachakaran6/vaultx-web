@@ -31,17 +31,17 @@ export function CategoryRail({
               type="button"
               onClick={() => onToggle(category.id)}
               className={cn(
-                "flex h-9 items-center gap-2 px-3.5 rounded-full border text-[13px] font-semibold transition-colors duration-150 whitespace-nowrap shadow-sm",
+                "flex h-8 items-center gap-2 px-3 rounded-md border text-xs font-semibold transition-colors duration-150 whitespace-nowrap shadow-sm",
                 isActive
-                  ? "bg-primary/10 border-primary/40 text-primary"
-                  : "bg-background border-border text-muted-foreground hover:text-foreground hover:border-border/80"
+                  ? "bg-accent-soft border-accent/30 text-accent"
+                  : "bg-surface border-border text-text-muted hover:text-text hover:bg-surface-2"
               )}
             >
               <span className="text-sm">{category.icon}</span>
               <span>{category.name}</span>
               <span className={cn(
-                "text-[11px] px-1.5 py-0.5 rounded-md font-bold ml-0.5",
-                isActive ? "bg-primary/20 text-primary" : "bg-secondary text-muted-foreground/80"
+                "text-[10px] px-1.5 py-0.5 rounded font-bold ml-0.5",
+                isActive ? "bg-accent/20 text-accent" : "bg-surface-2 text-text-muted"
               )}>
                 {count}
               </span>

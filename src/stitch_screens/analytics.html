@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Vault X | Analytics Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=JetBrains+Mono:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #13131b;
+            color: #e4e1ed;
+            overflow-x: hidden;
+        }
+        .sidebar-active-line {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #c0c1ff;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1b1b23;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #464554;
+            border-radius: 10px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#1f1f27",
+                        "secondary": "#b9c8de",
+                        "on-primary-fixed": "#07006c",
+                        "on-tertiary-container": "#452000",
+                        "on-primary-container": "#0d0096",
+                        "tertiary": "#ffb783",
+                        "surface-container-low": "#1b1b23",
+                        "on-background": "#e4e1ed",
+                        "secondary-container": "#39485a",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-surface-variant": "#c7c4d7",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "surface-container-high": "#292932",
+                        "primary-fixed": "#e1e0ff",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "secondary-fixed": "#d4e4fa",
+                        "surface-variant": "#34343d",
+                        "surface-container-lowest": "#0d0d15",
+                        "on-tertiary-fixed": "#301400",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "tertiary-fixed": "#ffdcc5",
+                        "tertiary-container": "#d97721",
+                        "outline": "#908fa0",
+                        "on-surface": "#e4e1ed",
+                        "on-error": "#690005",
+                        "inverse-primary": "#494bd6",
+                        "background": "#13131b",
+                        "primary-container": "#8083ff",
+                        "on-secondary-container": "#a7b6cc",
+                        "surface": "#13131b",
+                        "on-primary": "#1000a9",
+                        "error-container": "#93000a",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "on-tertiary-fixed-variant": "#703700",
+                        "surface-tint": "#c0c1ff",
+                        "inverse-surface": "#e4e1ed",
+                        "outline-variant": "#464554",
+                        "error": "#ffb4ab",
+                        "surface-bright": "#393841",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "surface-dim": "#13131b",
+                        "on-secondary": "#233143",
+                        "on-error-container": "#ffdad6",
+                        "inverse-on-surface": "#303038",
+                        "primary": "#c0c1ff",
+                        "surface-container-highest": "#34343d",
+                        "on-tertiary": "#4f2500"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "sidebar-width": "260px",
+                        "stack-xs": "4px",
+                        "grid-gutter": "16px",
+                        "stack-md": "12px",
+                        "stack-sm": "8px",
+                        "stack-lg": "24px",
+                        "container-padding": "32px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-caps": ["JetBrains Mono"],
+                        "code-sm": ["JetBrains Mono"],
+                        "display-sm": ["Inter"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-md": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "label-caps": ["11px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "code-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                        "display-sm": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="font-body-md text-body-md antialiased">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-sidebar-width bg-surface-container-low border-r border-outline-variant flex flex-col h-full py-container-padding z-50">
+<div class="px-6 mb-10">
+<h1 class="text-headline-md font-headline-md font-bold text-on-surface">Vault X</h1>
+<p class="text-on-surface-variant font-body-sm text-[11px] uppercase tracking-widest mt-1">Link Management</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-stack-md px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 transition-colors duration-200 cursor-pointer active:scale-95 group" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-body-md">Home</span>
+</a>
+<a class="flex items-center gap-stack-md px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 transition-colors duration-200 cursor-pointer active:scale-95 group" href="#">
+<span class="material-symbols-outlined">folder_open</span>
+<span class="font-body-md">Categories</span>
+</a>
+<a class="relative flex items-center gap-stack-md px-6 py-3 bg-primary/10 text-primary font-semibold transition-colors duration-200 cursor-pointer active:scale-95" href="#">
+<div class="sidebar-active-line"></div>
+<span class="material-symbols-outlined">insights</span>
+<span class="font-body-md">Analytics</span>
+</a>
+<a class="flex items-center gap-stack-md px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 transition-colors duration-200 cursor-pointer active:scale-95 group" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-md">Settings</span>
+</a>
+</nav>
+<div class="px-6 mb-6">
+<button class="w-full bg-primary-container text-on-primary py-2.5 rounded-lg font-semibold text-body-sm active:scale-[0.98] transition-transform flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                Add New Link
+            </button>
+</div>
+<div class="mt-auto border-t border-outline-variant/30 pt-6">
+<a class="flex items-center gap-stack-md px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 transition-colors duration-200 cursor-pointer" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-body-md">Help</span>
+</a>
+<a class="flex items-center gap-stack-md px-6 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/50 transition-colors duration-200 cursor-pointer" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-body-md">Logout</span>
+</a>
+</div>
+</aside>
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 w-[calc(100%-260px)] h-16 bg-background border-b border-outline-variant flex justify-between items-center px-container-padding z-40">
+<div class="flex items-center flex-1 max-w-xl">
+<div class="relative w-full group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg pl-10 pr-4 py-2 text-body-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-outline" placeholder="Search analytics or links..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-on-surface-variant hover:text-primary transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+<div class="flex items-center gap-3 pl-4 border-l border-outline-variant/30">
+<div class="text-right">
+<p class="text-body-sm font-semibold text-on-surface">Alex Rivera</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Pro Plan</p>
+</div>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-variant border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A professional studio portrait of a young tech executive with a friendly expression, set against a dark, minimalist slate grey background. The lighting is dramatic and moody, emphasizing a high-end corporate aesthetic consistent with a premium link management application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCX4v2kF5dZ5TrhYpE7LbL3k-4iB-S2_Jn4mri61ruU70F5QtViOQXf6gPzuKG3P_bgDYY5sFN56r545JbOn7rmtjgMxJCwRClPORcCZrHMf8x-ejEWjm4OHKd4is3j_aDiv6z8l1mZJUhMx5_xYFkph48JWpddokjH0OnxlAavjnLcB7TUmIHGwNZ5DqjFbps2tk9VvloSn11u_Zu2LMg4nbhxpf48ewie_mEleK-03v6uPUOhcxirVo-4wkoIlRArq82DS8PgMig"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-[260px] pt-16 min-h-screen">
+<div class="p-container-padding space-y-grid-gutter">
+<!-- Page Header -->
+<div class="flex justify-between items-end">
+<div>
+<h2 class="font-display-sm text-display-sm text-on-surface">Analytics</h2>
+<p class="text-on-surface-variant text-body-md mt-1">Real-time performance insights for your digital vault.</p>
+</div>
+<div class="flex items-center gap-stack-sm bg-surface-container rounded-lg p-1 border border-outline-variant">
+<button class="px-4 py-1.5 text-body-sm rounded bg-surface-variant text-on-surface shadow-sm">Last 30 Days</button>
+<button class="px-4 py-1.5 text-body-sm text-on-surface-variant hover:text-on-surface transition-colors">Last 90 Days</button>
+<button class="px-4 py-1.5 text-body-sm text-on-surface-variant hover:text-on-surface transition-colors">Year to Date</button>
+</div>
+</div>
+<!-- Key Metrics -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-grid-gutter">
+<div class="bg-surface-container-low border border-outline-variant p-6 rounded-lg relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[64px]" style="font-variation-settings: 'FILL' 1;">link</span>
+</div>
+<p class="text-label-caps text-outline uppercase">Total Links</p>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="text-[32px] font-bold text-on-surface">1,248</span>
+<span class="text-primary text-[12px] font-bold flex items-center">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+                            12%
+                        </span>
+</div>
+<p class="text-[11px] text-outline mt-1">+142 since last month</p>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-6 rounded-lg relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[64px]" style="font-variation-settings: 'FILL' 1;">ads_click</span>
+</div>
+<p class="text-label-caps text-outline uppercase">Monthly Clicks</p>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="text-[32px] font-bold text-on-surface">42,901</span>
+<span class="text-primary text-[12px] font-bold flex items-center">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+                            8.4%
+                        </span>
+</div>
+<p class="text-[11px] text-outline mt-1">Average 1,430/day</p>
+</div>
+<div class="bg-surface-container-low border border-outline-variant p-6 rounded-lg relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-[64px]" style="font-variation-settings: 'FILL' 1;">folder</span>
+</div>
+<p class="text-label-caps text-outline uppercase">Top Category</p>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="text-[32px] font-bold text-on-surface">Research</span>
+</div>
+<p class="text-[11px] text-outline mt-1">32% of total traffic</p>
+</div>
+</div>
+<!-- Charts and Detailed Stats Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-grid-gutter">
+<!-- Link Performance Chart Area -->
+<div class="lg:col-span-8 bg-surface-container-low border border-outline-variant rounded-lg p-6">
+<div class="flex justify-between items-center mb-8">
+<div>
+<h3 class="font-headline-md text-on-surface">Link Performance</h3>
+<p class="text-body-sm text-on-surface-variant">Click distribution over time</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-primary"></span>
+<span class="text-[12px] text-outline">Current</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-outline-variant"></span>
+<span class="text-[12px] text-outline">Previous</span>
+</div>
+</div>
+</div>
+<!-- SVG Chart Mockup -->
+<div class="h-64 w-full flex items-end justify-between gap-1 mt-4">
+<!-- Simplified bar chart representation -->
+<div class="flex-1 bg-primary/20 hover:bg-primary/40 transition-colors h-[40%] rounded-t-sm relative group cursor-pointer">
+<div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-surface-container-highest px-2 py-1 rounded text-[10px] hidden group-hover:block whitespace-nowrap">850 clicks</div>
+</div>
+<div class="flex-1 bg-primary/20 hover:bg-primary/40 transition-colors h-[55%] rounded-t-sm relative group cursor-pointer"></div>
+<div class="flex-1 bg-primary/20 hover:bg-primary/40 transition-colors h-[45%] rounded-t-sm relative group cursor-pointer"></div>
+<div class="flex-1 bg-primary/20 hover:bg-primary/40 transition-colors h-[70%] rounded-t-sm relative group cursor-pointer"></div>
+<div class="flex-1 bg-primary/20 hover:bg-primary/40 transition-colors h-[60%] rounded-t-sm relative group cursor-pointer"></div>
+<div class="flex-1 bg-primary/20 hover:bg-primary/40 transition-colors h-[85%] rounded-t-sm relative group cursor-pointer"></div>
+<div class="flex-1 bg-primary/20 hover:bg-primary/40 transition-colors h-[75%] rounded-t-sm relative group cursor-pointer"></div>
+<div class="flex-1 bg-primary/20 hover:bg-primary/40 transition-colors h-[90%] rounded-t-sm relative group cursor-pointer"></div>
+<div class="flex-1 bg-primary/20 hover:bg-primary/40 transition-colors h-[65%] rounded-t-sm relative group cursor-pointer"></div>
+<div class="flex-1 bg-primary/20 hover:bg-primary/40 transition-colors h-[80%] rounded-t-sm relative group cursor-pointer"></div>
+<div class="flex-1 bg-primary/20 hover:bg-primary/40 transition-colors h-[100%] rounded-t-sm relative group cursor-pointer"></div>
+<div class="flex-1 bg-primary/20 hover:bg-primary/40 transition-colors h-[95%] rounded-t-sm relative group cursor-pointer"></div>
+<div class="flex-1 bg-primary/20 hover:bg-primary/40 transition-colors h-[85%] rounded-t-sm relative group cursor-pointer"></div>
+<div class="flex-1 bg-primary/20 hover:bg-primary/40 transition-colors h-[70%] rounded-t-sm relative group cursor-pointer"></div>
+<div class="flex-1 bg-primary/20 hover:bg-primary/40 transition-colors h-[60%] rounded-t-sm relative group cursor-pointer"></div>
+</div>
+<div class="flex justify-between mt-4 text-[11px] text-outline px-1">
+<span>Day 1</span>
+<span>Day 5</span>
+<span>Day 10</span>
+<span>Day 15</span>
+<span>Day 20</span>
+<span>Day 25</span>
+<span>Day 30</span>
+</div>
+</div>
+<!-- Device Distribution -->
+<div class="lg:col-span-4 bg-surface-container-low border border-outline-variant rounded-lg p-6">
+<h3 class="font-headline-md text-on-surface mb-6">Device Split</h3>
+<div class="space-y-6">
+<div>
+<div class="flex justify-between items-center mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-outline">laptop</span>
+<span class="text-body-sm">Desktop</span>
+</div>
+<span class="font-code-sm text-[12px] text-on-surface">64%</span>
+</div>
+<div class="w-full bg-surface-variant h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[64%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-outline">smartphone</span>
+<span class="text-body-sm">Mobile</span>
+</div>
+<span class="font-code-sm text-[12px] text-on-surface">28%</span>
+</div>
+<div class="w-full bg-surface-variant h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-[28%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-outline">tablet</span>
+<span class="text-body-sm">Tablet</span>
+</div>
+<span class="font-code-sm text-[12px] text-on-surface">8%</span>
+</div>
+<div class="w-full bg-surface-variant h-1.5 rounded-full overflow-hidden">
+<div class="bg-outline h-full w-[8%]"></div>
+</div>
+</div>
+</div>
+<div class="mt-10 p-4 bg-surface-container-lowest rounded-lg border border-outline-variant/30">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary">info</span>
+<p class="text-[12px] leading-relaxed text-on-surface-variant">Desktop traffic peaked on Tuesdays between 10 AM and 2 PM. Consider scheduling your link shares during these windows.</p>
+</div>
+</div>
+</div>
+<!-- Most Visited Links Table -->
+<div class="lg:col-span-12 bg-surface-container-low border border-outline-variant rounded-lg overflow-hidden">
+<div class="p-6 border-b border-outline-variant flex justify-between items-center">
+<div>
+<h3 class="font-headline-md text-on-surface">Most Visited Links</h3>
+<p class="text-body-sm text-on-surface-variant">Individual link performance ranking</p>
+</div>
+<button class="text-primary text-body-sm hover:underline flex items-center gap-1">
+                            Export CSV
+                            <span class="material-symbols-outlined text-[16px]">download</span>
+</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-lowest">
+<th class="px-6 py-4 text-label-caps text-outline uppercase font-medium">Link Details</th>
+<th class="px-6 py-4 text-label-caps text-outline uppercase font-medium text-right">Total Visits</th>
+<th class="px-6 py-4 text-label-caps text-outline uppercase font-medium text-right">Unique Users</th>
+<th class="px-6 py-4 text-label-caps text-outline uppercase font-medium text-right">Growth (30d)</th>
+<th class="px-6 py-4 text-label-caps text-outline uppercase font-medium">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30">
+<tr class="hover:bg-surface-variant/20 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-[18px]">article</span>
+</div>
+<div>
+<p class="text-on-surface font-semibold">Q3 Design System Roadmap</p>
+<p class="font-code-sm text-[11px] text-outline">vault.x/q3-roadmap</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-right font-code-sm text-on-surface">4,520</td>
+<td class="px-6 py-4 text-right font-code-sm text-on-surface">1,892</td>
+<td class="px-6 py-4 text-right font-code-sm text-primary">+24.5%</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">Trending</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-variant/20 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+</div>
+<div>
+<p class="text-on-surface font-semibold">API Documentation v2</p>
+<p class="font-code-sm text-[11px] text-outline">vault.x/docs-api</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-right font-code-sm text-on-surface">3,210</td>
+<td class="px-6 py-4 text-right font-code-sm text-on-surface">1,105</td>
+<td class="px-6 py-4 text-right font-code-sm text-primary">+12.2%</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-surface-variant text-on-surface-variant border border-outline-variant/30">Stable</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-variant/20 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+</div>
+<div>
+<p class="text-on-surface font-semibold">Marketing Assets - Launch</p>
+<p class="font-code-sm text-[11px] text-outline">vault.x/mkt-launch</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-right font-code-sm text-on-surface">2,840</td>
+<td class="px-6 py-4 text-right font-code-sm text-on-surface">942</td>
+<td class="px-6 py-4 text-right font-code-sm text-error">-2.1%</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-surface-variant text-on-surface-variant border border-outline-variant/30">Stable</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-variant/20 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center border border-outline-variant">
+<span class="material-symbols-outlined text-[18px]">diversity_3</span>
+</div>
+<div>
+<p class="text-on-surface font-semibold">Investor Deck - Series A</p>
+<p class="font-code-sm text-[11px] text-outline">vault.x/deck-final</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-right font-code-sm text-on-surface">1,950</td>
+<td class="px-6 py-4 text-right font-code-sm text-on-surface">450</td>
+<td class="px-6 py-4 text-right font-code-sm text-primary">+84.3%</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">Viral</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Command Palette Hint -->
+<div class="fixed bottom-8 right-8 flex items-center gap-3 bg-surface-container-high border border-outline-variant px-4 py-2 rounded-full shadow-2xl z-50">
+<span class="text-[10px] text-on-surface-variant font-code-sm flex items-center gap-1">
+<span class="border border-outline-variant px-1 rounded">⌘</span> + <span class="border border-outline-variant px-1 rounded">K</span> to search
+        </span>
+<div class="w-[1px] h-4 bg-outline-variant"></div>
+<button class="material-symbols-outlined text-primary hover:scale-110 transition-transform">bolt</button>
+</div>
+<!-- Micro-interaction Scripts -->
+<script>
+        // Simple search focus interaction
+        document.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                document.querySelector('input').focus();
+            }
+        });
+
+        // Add a subtle hover effect to bars
+        const bars = document.querySelectorAll('.flex-1.bg-primary\\/20');
+        bars.forEach(bar => {
+            bar.addEventListener('mouseenter', () => {
+                bar.style.filter = 'drop-shadow(0 0 8px rgba(192, 193, 255, 0.3))';
+            });
+            bar.addEventListener('mouseleave', () => {
+                bar.style.filter = 'none';
+            });
+        });
+    </script>
+</body></html>

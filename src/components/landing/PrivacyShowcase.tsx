@@ -18,7 +18,7 @@ export function PrivacyShowcase() {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <Badge variant="glass" className="text-emerald-400 border-emerald-500/20 mb-6">
+            <Badge variant="outline" className="text-emerald-400 border-emerald-500/20 mb-6">
               100% Local Encryption
             </Badge>
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-gradient">

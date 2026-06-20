@@ -2,7 +2,7 @@ import { useLocation, Link } from "react-router-dom";
 import { Search, Plus, Moon, Sun, Monitor, Sparkles, ChevronRight, Command, X } from "lucide-react";
 import { useAppStore } from "../store/app-store";
 import { useTheme } from "./ThemeProvider";
-import { Button } from "./ui/Button";
+import { Button } from "./ui/button";
 import { cn } from "../utils/cn";
 
 const ROUTE_LABELS: Record<string, string> = {
@@ -100,9 +100,9 @@ export function GlobalHeader() {
         <Button
           onClick={() => openAddDialog()}
           size="sm"
-          leftIcon={<Plus size={15} strokeWidth={2.5} />}
-          className="h-9 shadow-sm"
+          className="h-9 shadow-sm gap-2"
         >
+          <Plus size={15} strokeWidth={2.5} />
           <span className="hidden sm:inline">Quick Add</span>
           <span className="sm:hidden">Add</span>
         </Button>
