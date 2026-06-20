@@ -5,6 +5,7 @@ import { getDomain, isValidHttpUrl } from "../utils/url";
 import { fetchLinkMetadata } from "../utils/metadata";
 import { Loader2, Check } from "lucide-react";
 import { cn } from "../utils/cn";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "./ui/dropdown-menu";
 
 export function AddLinkDialog() {
   const open = useAppStore((state) => state.isAddDialogOpen);
@@ -168,22 +169,37 @@ export function AddLinkDialog() {
               />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 flex flex-col">
               <label className="text-xs font-semibold text-text uppercase tracking-wider">Collection</label>
-              <select
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
-                className={cn(
-                  inputBase, 
-                  "cursor-pointer pr-8 appearance-none bg-secondary/40 dark:bg-secondary/20 bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-[length:12px_12px] bg-[right_12px_center] bg-no-repeat"
-                )}
-              >
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id} className="bg-card text-foreground">
-                    {category.icon} {category.name}
-                  </option>
-                ))}
-              </select>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className={cn(
+                      inputBase, 
+                      "flex items-center justify-between text-left cursor-pointer bg-secondary/40 dark:bg-secondary/20"
+                    )}
+                  >
+                    <span className="flex items-center gap-2 text-text">
+                      <span>{categories.find(c => c.id === categoryId)?.icon}</span>
+                      <span>{categories.find(c => c.id === categoryId)?.name}</span>
+                    </span>
+                    <span className="material-symbols-outlined text-[16px] text-text-faint">expand_more</span>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-[calc(50vw-2rem)] sm:w-[220px]">
+                  {categories.map((category) => (
+                    <DropdownMenuItem 
+                      key={category.id} 
+                      onClick={() => setCategoryId(category.id)}
+                      className="cursor-pointer flex items-center gap-2 h-9"
+                    >
+                      <span className="text-[16px]">{category.icon}</span>
+                      <span className="font-medium text-[13px]">{category.name}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 
