@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.vaultx.vault_x",
+    "sha256_cert_fingerprints": [
+      "AF:9C:B8:A5:BC:6D:60:8A:2D:3B:43:6F:36:6F:EE:13:60:B9:CE:80:70:6F:12:8D:BF:FC:5E:B6:B2:E8:EC:A0"
+    ]
+  }
+}]
