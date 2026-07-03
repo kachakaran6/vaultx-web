@@ -10,7 +10,8 @@ export const DEFAULT_SETTINGS: VaultSettings = {
   titleHistory: [],
   clipboardLastPromptUrl: "",
   notificationsEnabled: false,
-  appLocked: false
+  appLocked: false,
+  viewMode: "list"
 };
 
 export function createDefaultSettingRecords(now = Date.now()): SettingRecord[] {

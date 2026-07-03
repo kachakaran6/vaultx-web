@@ -7,6 +7,11 @@ export interface ToastItem {
   title: string;
   description?: string;
   tone: ToastTone;
+  duration?: number;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
 }
 
 interface ToastStore {

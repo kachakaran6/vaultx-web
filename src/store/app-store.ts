@@ -291,6 +291,8 @@ export const useAppStore = create<AppStore>((set, get) => ({
       tags: sanitizeTags(draft.tags),
       notes: draft.notes.trim(),
       isFavorite: draft.isFavorite,
+      username: draft.username?.trim() || undefined,
+      password: draft.password?.trim() || undefined,
       createdAt: existing?.createdAt ?? now,
       lastVisited: existing?.lastVisited ?? null,
       visitCount: existing?.visitCount ?? 0,
@@ -649,6 +651,8 @@ export const useAppStore = create<AppStore>((set, get) => ({
             categoryId,
             tags: mergeUniqueStrings(existing.tags, importedLink.tags ?? []),
             notes: importedLink.notes?.trim() || existing.notes,
+            username: importedLink.username?.trim() || existing.username,
+            password: importedLink.password?.trim() || existing.password,
             isFavorite: existing.isFavorite || Boolean(importedLink.isFavorite),
             visitCount: Math.max(existing.visitCount, importedLink.visitCount ?? 0),
             lastVisited:
@@ -674,6 +678,8 @@ export const useAppStore = create<AppStore>((set, get) => ({
           categoryId,
           tags: sanitizeTags(importedLink.tags ?? []),
           notes: importedLink.notes?.trim() || "",
+          username: importedLink.username?.trim() || undefined,
+          password: importedLink.password?.trim() || undefined,
           isFavorite: Boolean(importedLink.isFavorite),
           createdAt:
             typeof importedLink.createdAt === "number" ? importedLink.createdAt : Date.now(),

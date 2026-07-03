@@ -4,21 +4,22 @@
 
 @layer base {
   :root {
-    --bg: #FAFAFA;
+    /* Light theme — warm, professional neutrals */
+    --bg: #F7F8FA;
     --surface: #FFFFFF;
-    --surface-2: #F4F4F5;
-    --border: #E4E4E7;
-    --text: #18181B;
-    --text-muted: #71717A;
-    --text-faint: #A1A1AA;
+    --surface-2: #F0F2F5;
+    --border: #E1E4E9;
+    --text: #14161A;
+    --text-muted: #5B616B;
+    --text-faint: #9AA0AA;
 
-    --accent: #6366F1;
-    --accent-hover: #4F46E5;
-    --accent-soft: #EEF0FF;
+    --accent: #3457D5;
+    --accent-hover: #2B46B0;
+    --accent-soft: #EAEEFC;
 
-    --success: #10B981;
-    --danger: #EF4444;
-    --warning: #F59E0B;
+    --success: #0F9D6E;
+    --danger: #E1493A;
+    --warning: #E08E1D;
 
     --space-1: 4px;
     --space-2: 8px;
@@ -34,72 +35,93 @@
   }
 
   .dark {
-    --bg: #0A0A0B;
-    --surface: #131316;
-    --surface-2: #1C1C1F;
-    --border: #26262B;
-    --text: #F4F4F5;
-    --text-muted: #9A9AA2;
-    --text-faint: #6B6B72;
+    /* Dark theme — deep charcoal, not pure black, for a smoother feel */
+    --bg: #0E1013;
+    --surface: #16181D;
+    --surface-2: #1E2129;
+    --border: #2B2F38;
+    --text: #EDEEF2;
+    --text-muted: #9BA1AC;
+    --text-faint: #656B76;
 
-    --success: #10B981;
-    --danger: #EF4444;
-    --warning: #F59E0B;
+    --success: #22B37F;
+    --danger: #F0584A;
+    --warning: #EFA23A;
   }
 
-  /* Accent Colors */
-  :root, :root[data-accent="blue"] {
-    --accent: #2563EB;
-    --accent-hover: #1D4ED8;
-    --accent-soft: #EFF6FF;
+  /* Accent Colors — deeper, richer, flatter (no neon glow) */
+  :root,
+  :root[data-accent="blue"] {
+    --accent: #3457D5;
+    --accent-hover: #2B46B0;
+    --accent-soft: #EAEEFC;
   }
-  .dark, .dark[data-accent="blue"] {
-    --accent-soft: #2563eb26;
+
+  .dark,
+  .dark[data-accent="blue"] {
+    --accent: #5C7CFA;
+    --accent-hover: #789AFF;
+    --accent-soft: #3457D522;
   }
 
   :root[data-accent="purple"] {
-    --accent: #9333EA;
-    --accent-hover: #7E22CE;
-    --accent-soft: #F3E8FF;
+    --accent: #7440C8;
+    --accent-hover: #5F32A3;
+    --accent-soft: #F0EAFB;
   }
+
   .dark[data-accent="purple"] {
-    --accent-soft: #9333ea26;
+    --accent: #9B6FE0;
+    --accent-hover: #B18DEA;
+    --accent-soft: #7440C822;
   }
 
   :root[data-accent="emerald"] {
-    --accent: #10B981;
-    --accent-hover: #059669;
-    --accent-soft: #ECFDF5;
+    --accent: #0E8F63;
+    --accent-hover: #0B7350;
+    --accent-soft: #E5F5EF;
   }
+
   .dark[data-accent="emerald"] {
-    --accent-soft: #10b98126;
+    --accent: #2FB784;
+    --accent-hover: #4CC79A;
+    --accent-soft: #0E8F6322;
   }
 
   :root[data-accent="orange"] {
-    --accent: #F97316;
-    --accent-hover: #EA580C;
-    --accent-soft: #FFF7ED;
+    --accent: #C15C1F;
+    --accent-hover: #A34B18;
+    --accent-soft: #FBEEE3;
   }
+
   .dark[data-accent="orange"] {
-    --accent-soft: #f9731626;
+    --accent: #E08A4A;
+    --accent-hover: #E8A26C;
+    --accent-soft: #C15C1F22;
   }
 
   :root[data-accent="pink"] {
-    --accent: #EC4899;
-    --accent-hover: #DB2777;
-    --accent-soft: #FDF2F8;
+    --accent: #C23570;
+    --accent-hover: #9F2A5B;
+    --accent-soft: #FBEBF2;
   }
+
   .dark[data-accent="pink"] {
-    --accent-soft: #ec489926;
+    --accent: #E2649B;
+    --accent-hover: #EA85B1;
+    --accent-soft: #C2357022;
   }
 
   :root[data-accent="slate"] {
-    --accent: #64748B;
-    --accent-hover: #475569;
-    --accent-soft: #F8FAFC;
+    --accent: #46505E;
+    --accent-hover: #363E49;
+    --accent-soft: #EEF0F3;
   }
+
   .dark[data-accent="slate"] {
-    --accent-soft: #64748b26;
+    --accent: #8B95A3;
+    --accent-hover: #A3ABB7;
+    --accent-soft: #46505E22;
   }
 }
 
@@ -160,5 +182,29 @@
   .hide-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  /* Custom Scrollbar Styles */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-muted);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
   }
 }

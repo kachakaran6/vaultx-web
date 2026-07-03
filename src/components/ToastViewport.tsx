@@ -14,11 +14,13 @@ export function ToastViewport() {
   const { toasts, dismiss } = useToastStore();
 
   useEffect(() => {
-    const timeouts = toasts.map((toast) =>
-      window.setTimeout(() => {
+    const timeouts = toasts.map((toast) => {
+      const duration = toast.duration ?? (toast.action ? 10000 : 4000);
+      if (duration === 0) return null;
+      return window.setTimeout(() => {
         dismiss(toast.id);
-      }, 4000)
-    );
+      }, duration);
+    }).filter(Boolean) as number[];
 
     return () => {
       timeouts.forEach((timeout) => window.clearTimeout(timeout));
@@ -45,6 +47,21 @@ export function ToastViewport() {
                 <h4 className="text-[14px] font-semibold text-foreground leading-none">{toast.title}</h4>
                 {toast.description && (
                   <p className="mt-1.5 text-[13px] font-medium text-muted-foreground leading-snug">{toast.description}</p>
+                )}
+                {toast.action && (
+                  <button
+                    onClick={() => {
+                      toast.action!.onClick();
+                      dismiss(toast.id);
+                    }}
+                    className={`mt-2.5 px-3 py-1.5 text-xs font-semibold rounded-md border shadow-sm transition-colors ${
+                      toast.tone === "info" ? "bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100" :
+                      toast.tone === "success" ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100" :
+                      "bg-surface-2 text-text border-border hover:bg-border"
+                    }`}
+                  >
+                    {toast.action.label}
+                  </button>
                 )}
               </div>
             </motion.div>

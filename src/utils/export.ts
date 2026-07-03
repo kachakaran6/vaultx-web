@@ -83,7 +83,8 @@ export async function parseImportedSnapshot(
       titleHistory: sanitizeArray<string>(parsed.settings?.titleHistory),
       clipboardLastPromptUrl: parsed.settings?.clipboardLastPromptUrl ?? "",
       notificationsEnabled: Boolean(parsed.settings?.notificationsEnabled),
-      appLocked: false
+      appLocked: false,
+      viewMode: parsed.settings?.viewMode ?? "list"
     }
   };
 }

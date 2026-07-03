@@ -15,6 +15,8 @@ export interface LinkRecord {
   lastVisited: number | null;
   visitCount: number;
   order: number;
+  username?: string;
+  password?: string;
 }
 
 export interface CategoryRecord {
@@ -45,6 +47,7 @@ export interface VaultSettings {
   clipboardLastPromptUrl: string;
   notificationsEnabled: boolean;
   appLocked: boolean;
+  viewMode: "list" | "grid" | "table" | "compact";
 }
 
 export type SettingKey = keyof VaultSettings;
@@ -63,6 +66,8 @@ export interface LinkDraft {
   tags: string[];
   notes: string;
   isFavorite: boolean;
+  username?: string;
+  password?: string;
 }
 
 export interface CategoryDraft {

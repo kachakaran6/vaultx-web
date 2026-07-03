@@ -3,6 +3,9 @@ import { CategoryRail } from "../components/CategoryRail";
 import { LinkList } from "../components/LinkList";
 import { selectLinkCountsByCategory, selectVisibleLinks, useAppStore } from "../store/app-store";
 import { PageHeader } from "../components/ui/PageHeader";
+import { useState } from "react";
+import { encodeSharedLinks } from "../utils/share";
+import { pushToast } from "../store/toast-store";
 
 export function HomePage() {
   const state = useAppStore();
@@ -17,29 +20,163 @@ export function HomePage() {
     [state.reminders]
   );
   const hasFilter = Boolean(state.searchQuery || state.selectedCategoryId || state.homeView === "favorites");
-  const allowDrag = state.homeView === "all" && !state.searchQuery && !state.selectedCategoryId;
+  
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  
+  const [tableColumns, setTableColumns] = useState({
+    url: false,
+    category: true,
+    tags: false,
+    notes: false,
+    username: false,
+    password: false,
+    visits: true,
+    actions: true
+  });
+  const [showColumnMenu, setShowColumnMenu] = useState(false);
+
+  const allowDrag = state.homeView === "all" && !state.searchQuery && !state.selectedCategoryId && state.settings.viewMode === "list" && !selectionMode;
+
+  const handleSelectLink = (linkId: string, selected: boolean) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (selected) next.add(linkId);
+      else next.delete(linkId);
+      return next;
+    });
+  };
+
+  const handleShareSelected = async () => {
+    if (selectedIds.size === 0) return;
+    const selectedLinks = state.links.filter(link => selectedIds.has(link.id));
+    try {
+      const payload = await encodeSharedLinks(selectedLinks);
+      const shareUrl = `${window.location.origin}${window.location.pathname}#import=${payload}`;
+      await navigator.clipboard.writeText(shareUrl);
+      pushToast({ tone: "success", title: "Share Link Copied", description: "The link has been copied to your clipboard." });
+      setSelectionMode(false);
+      setSelectedIds(new Set());
+    } catch (e) {
+      pushToast({ tone: "danger", title: "Failed to generate share link" });
+    }
+  };
 
   return (
     <div className="flex-1 w-full animate-in fade-in duration-300">
-      <div className="flex items-center gap-2 mb-6">
-        <button 
-          className={`flex items-center gap-2 px-3 h-8 rounded-md border text-xs font-medium transition-colors ${state.homeView === "all" ? "bg-accent text-surface border-accent shadow-sm" : "border-border text-text hover:bg-surface-2"}`}
-          onClick={() => state.setHomeView("all")}
-        >
-          <span className="material-symbols-outlined text-[14px]">list</span>
-          All
-        </button>
-        <button 
-          className={`flex items-center gap-2 px-3 h-8 rounded-md border text-xs font-medium transition-colors ${state.homeView === "favorites" ? "bg-accent text-surface border-accent shadow-sm" : "border-border text-text hover:bg-surface-2"}`}
-          onClick={() => state.setHomeView("favorites")}
-        >
-          <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: state.homeView === "favorites" ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
-          Favorites
-        </button>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div className="flex items-center gap-2">
+          <button 
+            className={`flex items-center gap-2 px-3 h-8 rounded-md border text-xs font-medium transition-colors ${state.homeView === "all" ? "bg-accent text-surface border-accent shadow-sm" : "border-border text-text hover:bg-surface-2"}`}
+            onClick={() => state.setHomeView("all")}
+          >
+            <span className="material-symbols-outlined text-[14px]">list</span>
+            All
+          </button>
+          <button 
+            className={`flex items-center gap-2 px-3 h-8 rounded-md border text-xs font-medium transition-colors ${state.homeView === "favorites" ? "bg-accent text-surface border-accent shadow-sm" : "border-border text-text hover:bg-surface-2"}`}
+            onClick={() => state.setHomeView("favorites")}
+          >
+            <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: state.homeView === "favorites" ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
+            Favorites
+          </button>
+        </div>
+        
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          {selectionMode ? (
+            <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1">
+              <button
+                className="px-3 h-8 text-xs font-medium border border-border rounded-md hover:bg-surface-2 transition-colors whitespace-nowrap"
+                onClick={() => { setSelectionMode(false); setSelectedIds(new Set()); }}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-3 h-8 text-xs font-medium border border-border rounded-md hover:bg-surface-2 transition-colors whitespace-nowrap"
+                onClick={() => {
+                  if (selectedIds.size === visibleLinks.length) {
+                    setSelectedIds(new Set());
+                  } else {
+                    setSelectedIds(new Set(visibleLinks.map(l => l.id)));
+                  }
+                }}
+              >
+                {selectedIds.size === visibleLinks.length ? "Deselect All" : "Select All"}
+              </button>
+              <button
+                className="flex items-center gap-2 px-3 h-8 text-xs font-medium bg-accent text-surface rounded-md disabled:opacity-50 transition-colors whitespace-nowrap"
+                disabled={selectedIds.size === 0}
+                onClick={handleShareSelected}
+              >
+                <span className="material-symbols-outlined text-[14px]">share</span>
+                Share ({selectedIds.size})
+              </button>
+            </div>
+          ) : (
+            <button
+              className="flex items-center gap-1.5 px-3 h-8 text-xs font-medium text-text-muted hover:text-text border border-transparent hover:border-border rounded-md transition-colors"
+              onClick={() => setSelectionMode(true)}
+            >
+              <span className="material-symbols-outlined text-[16px]">check_box</span>
+              Select
+            </button>
+          )}
+
+          <div className="w-px h-6 bg-border mx-1"></div>
+
+          <div className="flex items-center bg-surface border border-border rounded-md relative shadow-sm">
+            <div className="flex items-center overflow-hidden">
+              {[
+                { id: "list", icon: "view_list" },
+                { id: "grid", icon: "grid_view" },
+                { id: "table", icon: "table_rows" },
+                { id: "compact", icon: "view_headline" }
+              ].map((view) => (
+                <button
+                  key={view.id}
+                  onClick={() => state.updateSetting("viewMode", view.id as any)}
+                  className={`w-8 h-8 flex items-center justify-center transition-colors ${state.settings.viewMode === view.id ? "bg-accent/10 text-accent" : "text-text-muted hover:text-text hover:bg-surface-2"}`}
+                  title={`Switch to ${view.id} view`}
+                >
+                  <span className="material-symbols-outlined text-[16px]">{view.icon}</span>
+                </button>
+              ))}
+            </div>
+            
+            {state.settings.viewMode === "table" && (
+              <div className="relative border-l border-border">
+                <button
+                  className="w-8 h-8 flex items-center justify-center text-text-muted hover:text-text hover:bg-surface-2 transition-colors"
+                  onClick={() => setShowColumnMenu(!showColumnMenu)}
+                  title="Select Columns"
+                >
+                  <span className="material-symbols-outlined text-[16px]">view_column</span>
+                </button>
+                
+                {showColumnMenu && (
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-surface border border-border rounded-lg shadow-xl z-50 py-1" onMouseLeave={() => setShowColumnMenu(false)}>
+                    <div className="px-3 py-2 text-xs font-semibold text-text-muted uppercase tracking-wider">Visible Columns</div>
+                    {(Object.keys(tableColumns) as Array<keyof typeof tableColumns>).map((col) => (
+                      <label key={col} className="flex items-center gap-3 px-3 py-2 hover:bg-surface-2 cursor-pointer transition-colors">
+                        <input 
+                          type="checkbox" 
+                          checked={tableColumns[col]} 
+                          onChange={(e) => setTableColumns(prev => ({ ...prev, [col]: e.target.checked }))}
+                          className="w-4 h-4 accent-accent rounded border-border"
+                        />
+                        <span className="text-sm text-text capitalize">{col}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {state.categories.length > 0 && (
-        <div className="mb-6 flex-1 min-w-0 overflow-x-auto hide-scrollbar pb-2">
+        <div className="mb-6 flex-1 min-w-0 pb-1">
           <CategoryRail
             categories={state.categories}
             counts={linkCounts}
@@ -127,6 +264,11 @@ export function HomePage() {
               onReorder={(orderedIds) => {
                 void state.reorderLinks(orderedIds);
               }}
+              viewMode={state.settings.viewMode}
+              selectionMode={selectionMode}
+              selectedIds={selectedIds}
+              onSelectLink={handleSelectLink}
+              tableColumns={tableColumns}
             />
           </div>
         )}

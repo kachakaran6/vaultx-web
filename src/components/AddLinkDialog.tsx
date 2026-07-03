@@ -27,6 +27,9 @@ export function AddLinkDialog() {
   const [categoryId, setCategoryId] = useState("general");
   const [tagsInput, setTagsInput] = useState("");
   const [notes, setNotes] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [saving, setSaving] = useState(false);
   const [fetching, setFetching] = useState(false);
@@ -42,6 +45,8 @@ export function AddLinkDialog() {
       setCategoryId(existingLink.categoryId);
       setTagsInput(existingLink.tags.join(", "));
       setNotes(existingLink.notes);
+      setUsername(existingLink.username || "");
+      setPassword(existingLink.password || "");
       setIsFavorite(existingLink.isFavorite);
       return;
     }
@@ -51,6 +56,8 @@ export function AddLinkDialog() {
     setCategoryId(categories.find((c) => c.id === "general")?.id ?? categories[0]?.id ?? "general");
     setTagsInput("");
     setNotes("");
+    setUsername("");
+    setPassword("");
     setIsFavorite(false);
   }, [open, addDialogLinkId, addDialogPresetUrl, existingLink, categories]);
 
@@ -85,6 +92,8 @@ export function AddLinkDialog() {
       categoryId,
       tags: tagsInput.split(","),
       notes,
+      username,
+      password,
       isFavorite
     });
     setSaving(false);
@@ -200,6 +209,39 @@ export function AddLinkDialog() {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-text uppercase tracking-wider">Username (Optional)</label>
+              <input
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Account username"
+                className={inputBase}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-text uppercase tracking-wider">Password (Optional)</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Account password"
+                  className={cn(inputBase, "pr-10")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-text-muted hover:text-text"
+                >
+                  <span className="material-symbols-outlined text-[18px]">
+                    {showPassword ? "visibility_off" : "visibility"}
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
 
