@@ -120,7 +120,10 @@ export function LinkList({
   selectedIds,
   onSelectLink,
   selectionMode = false,
-  tableColumns = { category: true, visits: true, actions: true }
+  tableColumns = { 
+    category: true, visits: true, actions: true, 
+    url: false, notes: false, tags: false, username: false, password: false 
+  }
 }: LinkListProps) {
   const [showPasswords, setShowPasswords] = useState(false);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));

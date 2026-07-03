@@ -3,6 +3,8 @@ import { StatsCharts } from "../components/StatsCharts";
 import { formatRelativeTime } from "../utils/date";
 import { useAppStore } from "../store/app-store";
 import { PageHeader } from "../components/ui/PageHeader";
+import { GrowthChart } from "../components/GrowthChart";
+import { ActivityHeatmap } from "../components/ActivityHeatmap";
 
 export function StatsPage() {
   const state = useAppStore();
@@ -55,6 +57,12 @@ export function StatsPage() {
             </div>
             <span className="text-3xl font-bold tracking-tight text-text">{state.categories.length}</span>
           </div>
+        </div>
+
+        {/* Charts Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <GrowthChart links={state.links} />
+          <ActivityHeatmap links={state.links} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
