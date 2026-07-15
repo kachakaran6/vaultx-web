@@ -21,6 +21,7 @@ import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
 import { ClusterPage } from "./pages/ClusterPage";
 import { BoardGalleryPage } from "./pages/BoardGalleryPage";
 import { BoardWorkspacePage } from "./pages/BoardWorkspacePage";
+import { RoadmapPage } from "./pages/RoadmapPage";
 import { useAppStore } from "./store/app-store";
 
 function LoadingScreen() {
@@ -60,6 +61,7 @@ export default function App() {
               <Route path="/boards/:id" element={<BoardWorkspacePage />} />
               <Route path="/stats" element={<StatsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/roadmap" element={<RoadmapPage />} />
             </Route>
           </Routes>
 

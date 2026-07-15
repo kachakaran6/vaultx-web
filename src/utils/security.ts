@@ -98,3 +98,83 @@ export async function decryptText(payload: EncryptedVaultSnapshot, password: str
 
   return new TextDecoder().decode(decrypted);
 }
+
+export function generateSecurePassword(length = 16): string {
+  const lowercase = "abcdefghijklmnopqrstuvwxyz";
+  const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const numbers = "0123456789";
+  const symbols = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+  const allChars = lowercase + uppercase + numbers + symbols;
+
+  const array = new Uint32Array(length);
+  crypto.getRandomValues(array);
+
+  let password = "";
+  // Ensure at least one character from each set for strong security
+  password += lowercase[array[0] % lowercase.length];
+  password += uppercase[array[1] % uppercase.length];
+  password += numbers[array[2] % numbers.length];
+  password += symbols[array[3] % symbols.length];
+
+  for (let i = 4; i < length; i++) {
+    password += allChars[array[i] % allChars.length];
+  }
+
+  // Shuffle the password characters
+  const passwordArray = password.split("");
+  const shuffleArray = new Uint32Array(length);
+  crypto.getRandomValues(shuffleArray);
+  for (let i = length - 1; i > 0; i--) {
+    const j = shuffleArray[i] % (i + 1);
+    const temp = passwordArray[i];
+    passwordArray[i] = passwordArray[j];
+    passwordArray[j] = temp;
+  }
+
+  return passwordArray.join("");
+}
+
+const TRUSTED_DOMAINS = [
+  "paypal.com",
+  "google.com",
+  "apple.com",
+  "facebook.com",
+  "amazon.com",
+  "netflix.com",
+  "microsoft.com",
+  "github.com",
+  "twitter.com",
+  "instagram.com",
+  "samast.pro"
+];
+
+export function detectConfusableDomain(inputUrl: string): string | null {
+  try {
+    const urlObj = new URL(inputUrl.startsWith("http") ? inputUrl : `https://${inputUrl}`);
+    const host = urlObj.hostname.toLowerCase().replace(/^www\./, "");
+    
+    if (TRUSTED_DOMAINS.includes(host)) {
+      return null;
+    }
+    
+    const normalize = (str: string) => {
+      return str
+        .replace(/[1i|]/g, "l")
+        .replace(/0/g, "o")
+        .replace(/rn/g, "m")
+        .replace(/vv/g, "w");
+    };
+    
+    const normalizedHost = normalize(host);
+    
+    for (const trusted of TRUSTED_DOMAINS) {
+      const normalizedTrusted = normalize(trusted);
+      if (normalizedHost === normalizedTrusted) {
+        return trusted;
+      }
+    }
+  } catch (e) {
+    // ignore malformed URLs
+  }
+  return null;
+}

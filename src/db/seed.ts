@@ -11,7 +11,10 @@ export const DEFAULT_SETTINGS: VaultSettings = {
   clipboardLastPromptUrl: "",
   notificationsEnabled: false,
   appLocked: false,
-  viewMode: "list"
+  viewMode: "list",
+  readingStreak: 0,
+  lastReadDate: "",
+  activeWorkspaceId: "default"
 };
 
 export function createDefaultSettingRecords(now = Date.now()): SettingRecord[] {

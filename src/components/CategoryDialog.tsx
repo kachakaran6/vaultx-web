@@ -3,25 +3,51 @@ import { ModalShell } from "./ModalShell";
 import { useAppStore } from "../store/app-store";
 import { CATEGORY_SWATCHES } from "../utils/colors";
 import { Check } from "lucide-react";
+import { Switch } from "./ui/switch";
 
 export function CategoryDialog() {
   const isOpen = useAppStore((state) => state.isCategoryDialogOpen);
   const close = useAppStore((state) => state.closeCategoryDialog);
   const addCategory = useAppStore((state) => state.addCategory);
+  const categories = useAppStore((state) => state.categories);
 
   const [name, setName] = useState("");
   const [icon, setIcon] = useState("📁");
   const [color, setColor] = useState<string>(CATEGORY_SWATCHES[0]);
+  const [parentCategoryId, setParentCategoryId] = useState("");
+  const [isSmart, setIsSmart] = useState(false);
+  const [smartTags, setSmartTags] = useState("");
+  const [smartQuery, setSmartQuery] = useState("");
+  const [smartFavoriteOnly, setSmartFavoriteOnly] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async () => {
     setSaving(true);
-    const result = await addCategory({ name, icon, color });
+    const tags = smartTags.split(",").map(t => t.trim()).filter(Boolean);
+    const rules = isSmart ? {
+      tags: tags.length > 0 ? tags : undefined,
+      query: smartQuery.trim() || undefined,
+      favoriteOnly: smartFavoriteOnly || undefined
+    } : undefined;
+
+    const result = await addCategory({ 
+      name, 
+      icon, 
+      color, 
+      isSmart, 
+      rules,
+      parentCategoryId: isSmart ? undefined : (parentCategoryId || undefined)
+    });
     setSaving(false);
     if (result.ok) {
       setName("");
       setIcon("📁");
       setColor(CATEGORY_SWATCHES[0]);
+      setParentCategoryId("");
+      setIsSmart(false);
+      setSmartTags("");
+      setSmartQuery("");
+      setSmartFavoriteOnly(false);
       close();
     }
   };
@@ -101,6 +127,69 @@ export function CategoryDialog() {
               );
             })}
           </div>
+        </div>
+
+        {!isSmart && (
+          <div className="space-y-1.5 pt-2">
+            <label className="text-[13px] font-semibold text-foreground">Parent Category (Optional)</label>
+            <select
+              value={parentCategoryId}
+              onChange={(e) => setParentCategoryId(e.target.value)}
+              className={inputBase}
+            >
+              <option value="">None (Top-Level Category)</option>
+              {categories.filter(c => !c.parentCategoryId && !c.isSmart && c.id !== "general").map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div className="pt-4 border-t border-border space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <label className="text-[13px] font-semibold text-foreground">Smart Collection</label>
+              <p className="text-xs text-text-muted">Automatically aggregate links using dynamic rules.</p>
+            </div>
+            <Switch 
+              checked={isSmart}
+              onCheckedChange={setIsSmart}
+            />
+          </div>
+
+          {isSmart && (
+            <div className="space-y-4 p-3 bg-secondary/20 dark:bg-secondary/10 rounded-lg border border-border/60 animate-in fade-in duration-200">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-text uppercase tracking-wider">Has Tags (comma separated)</label>
+                <input
+                  value={smartTags}
+                  onChange={(e) => setSmartTags(e.target.value)}
+                  placeholder="e.g. read, design"
+                  className={inputBase}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-text uppercase tracking-wider">URL or Title Contains</label>
+                <input
+                  value={smartQuery}
+                  onChange={(e) => setSmartQuery(e.target.value)}
+                  placeholder="e.g. github.com"
+                  className={inputBase}
+                />
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <div className="space-y-0.5">
+                  <label className="text-xs font-semibold text-text uppercase tracking-wider">Favorite Items Only</label>
+                </div>
+                <Switch 
+                  checked={smartFavoriteOnly}
+                  onCheckedChange={setSmartFavoriteOnly}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </ModalShell>

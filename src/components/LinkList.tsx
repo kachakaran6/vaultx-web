@@ -18,6 +18,7 @@ import { GripVertical } from "lucide-react";
 import { LinkCard } from "./LinkCard";
 import type { CategoryRecord, LinkRecord, ReminderRecord } from "../store/types";
 import { pushToast } from "../store/toast-store";
+import { copyPasswordAndScheduleClear } from "../utils/clipboard";
 
 interface LinkListProps {
   links: LinkRecord[];
@@ -31,6 +32,7 @@ interface LinkListProps {
   onDelete: (linkId: string) => void;
   onRemind: (linkId: string) => void;
   onReorder: (orderedIds: string[]) => void;
+  onReadMode?: (linkId: string) => void;
   viewMode?: "list" | "grid" | "table" | "compact";
   selectedIds?: Set<string>;
   onSelectLink?: (linkId: string, selected: boolean) => void;
@@ -57,6 +59,7 @@ function SortableItem({
   onEdit,
   onDelete,
   onRemind,
+  onReadMode,
   viewMode,
   selectedIds,
   onSelectLink,
@@ -84,6 +87,7 @@ function SortableItem({
         onDelete={() => onDelete(link.id)}
         onRemind={() => onRemind(link.id)}
         onRecordVisit={() => onRecordVisit(link.id)}
+        onReadMode={onReadMode ? () => onReadMode(link.id) : undefined}
         viewMode={viewMode}
         selectionMode={selectionMode}
         selected={selectedIds?.has(link.id)}
@@ -116,6 +120,7 @@ export function LinkList({
   onDelete,
   onRemind,
   onReorder,
+  onReadMode,
   viewMode = "list",
   selectedIds,
   onSelectLink,
@@ -131,8 +136,12 @@ export function LinkList({
 
   const handleCopy = async (text: string, type: string) => {
     try {
-      await navigator.clipboard.writeText(text);
-      pushToast({ tone: "success", title: "Copied!", description: `${type} copied to clipboard.` });
+      if (type === "Password") {
+        await copyPasswordAndScheduleClear(text);
+      } else {
+        await navigator.clipboard.writeText(text);
+        pushToast({ tone: "success", title: "Copied!", description: `${type} copied to clipboard.` });
+      }
     } catch (e) {
       pushToast({ tone: "danger", title: "Failed to copy" });
     }
@@ -155,6 +164,7 @@ export function LinkList({
       onDelete={() => onDelete(link.id)}
       onRemind={() => onRemind(link.id)}
       onRecordVisit={() => onRecordVisit(link.id)}
+      onReadMode={onReadMode ? () => onReadMode(link.id) : undefined}
       viewMode={viewMode}
       selectionMode={selectionMode}
       selected={selectedIds?.has(link.id)}
@@ -267,10 +277,15 @@ export function LinkList({
                     ) : "-"}
                   </td>
                 )}
-                {tableColumns.visits && <td className="px-4 py-3 text-text-faint">{link.visitCount}</td>}
+                 {tableColumns.visits && <td className="px-4 py-3 text-text-faint">{link.visitCount}</td>}
                 {tableColumns.actions && (
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {onReadMode && (
+                        <button type="button" onClick={() => onReadMode(link.id)} className="text-text-muted hover:text-text" title="Reader Mode">
+                          <span className="material-symbols-outlined text-[16px]">chrome_reader_mode</span>
+                        </button>
+                      )}
                       <button type="button" onClick={() => onToggleFavorite(link.id)} className="text-text-muted hover:text-text">
                         <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: link.isFavorite ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
                       </button>
@@ -327,6 +342,7 @@ export function LinkList({
               onEdit={onEdit}
               onDelete={onDelete}
               onRemind={onRemind}
+              onReadMode={onReadMode}
               viewMode={viewMode}
               selectedIds={selectedIds}
               onSelectLink={onSelectLink}

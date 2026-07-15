@@ -6,6 +6,11 @@ import { PageHeader } from "../components/ui/PageHeader";
 import { useState } from "react";
 import { encodeSharedLinks } from "../utils/share";
 import { pushToast } from "../store/toast-store";
+import { BulkEditDialog } from "../components/BulkEditDialog";
+import { ReaderModeDialog } from "../components/ReaderModeDialog";
+import type { LinkRecord } from "../store/types";
+import { KanbanBoard } from "../components/KanbanBoard";
+import { exportCategoryPortfolio } from "../utils/export";
 
 export function HomePage() {
   const state = useAppStore();
@@ -23,6 +28,8 @@ export function HomePage() {
   
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showBulkEditDialog, setShowBulkEditDialog] = useState(false);
+  const [readerLink, setReaderLink] = useState<LinkRecord | null>(null);
   
   const [tableColumns, setTableColumns] = useState({
     url: false,
@@ -59,6 +66,15 @@ export function HomePage() {
       setSelectedIds(new Set());
     } catch (e) {
       pushToast({ tone: "danger", title: "Failed to generate share link" });
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (window.confirm(`Delete ${selectedIds.size} links permanently?`)) {
+      await state.bulkDeleteLinks(Array.from(selectedIds));
+      setSelectedIds(new Set());
+      setSelectionMode(false);
     }
   };
 
@@ -104,12 +120,28 @@ export function HomePage() {
                 {selectedIds.size === visibleLinks.length ? "Deselect All" : "Select All"}
               </button>
               <button
-                className="flex items-center gap-2 px-3 h-8 text-xs font-medium bg-accent text-surface rounded-md disabled:opacity-50 transition-colors whitespace-nowrap"
+                className="flex items-center gap-2 px-3 h-8 text-xs font-medium bg-accent text-surface rounded-md disabled:opacity-50 transition-colors whitespace-nowrap cursor-pointer hover:brightness-110"
                 disabled={selectedIds.size === 0}
                 onClick={handleShareSelected}
               >
                 <span className="material-symbols-outlined text-[14px]">share</span>
                 Share ({selectedIds.size})
+              </button>
+              <button
+                className="flex items-center gap-2 px-3 h-8 text-xs font-medium bg-surface border border-border text-text hover:bg-surface-2 rounded-md disabled:opacity-50 transition-colors whitespace-nowrap cursor-pointer"
+                disabled={selectedIds.size === 0}
+                onClick={() => setShowBulkEditDialog(true)}
+              >
+                <span className="material-symbols-outlined text-[14px]">edit</span>
+                Edit ({selectedIds.size})
+              </button>
+              <button
+                className="flex items-center gap-2 px-3 h-8 text-xs font-medium bg-red-600 text-white rounded-md disabled:opacity-50 transition-colors whitespace-nowrap cursor-pointer hover:bg-red-700"
+                disabled={selectedIds.size === 0}
+                onClick={handleBulkDelete}
+              >
+                <span className="material-symbols-outlined text-[14px]">delete</span>
+                Delete ({selectedIds.size})
               </button>
             </div>
           ) : (
@@ -122,6 +154,49 @@ export function HomePage() {
             </button>
           )}
 
+          {/* Time Machine Date Picker */}
+          <div className="flex items-center gap-1 bg-surface border border-border rounded-md px-2 h-8 shadow-sm">
+            <span className="material-symbols-outlined text-[15px] text-text-muted">calendar_month</span>
+            <input
+              type="date"
+              value={state.timeMachineDate || ""}
+              onChange={(e) => state.setTimeMachineDate(e.target.value || null)}
+              className="bg-transparent border-none text-[11px] font-semibold text-text outline-none cursor-pointer focus:ring-0 max-w-[110px] p-0"
+              title="Time Machine: View items by date"
+            />
+            {state.timeMachineDate && (
+              <button 
+                onClick={() => state.setTimeMachineDate(null)}
+                className="text-text-muted hover:text-text p-0.5"
+                title="Clear date filter"
+              >
+                <span className="material-symbols-outlined text-[13px]">close</span>
+              </button>
+            )}
+          </div>
+
+          {/* Portfolio Exporter */}
+          {state.selectedCategoryId && (
+            <button
+              onClick={() => {
+                const category = categoriesById.get(state.selectedCategoryId!);
+                if (category) {
+                  exportCategoryPortfolio(category.name, visibleLinks);
+                  pushToast({
+                    tone: "success",
+                    title: "Portfolio Generated! 📖",
+                    description: `Downloaded Markdown dossier for ${category.name} collection.`
+                  });
+                }
+              }}
+              className="flex items-center justify-center gap-1.5 px-3 h-8 border border-border hover:bg-surface-2 rounded-md text-xs font-semibold text-text shadow-sm"
+              title="Export collection as Markdown Portfolio Dossier"
+            >
+              <span className="material-symbols-outlined text-[15px]">summarize</span>
+              <span>Export Dossier</span>
+            </button>
+          )}
+
           <div className="w-px h-6 bg-border mx-1"></div>
 
           <div className="flex items-center bg-surface border border-border rounded-md relative shadow-sm">
@@ -129,6 +204,7 @@ export function HomePage() {
               {[
                 { id: "list", icon: "view_list" },
                 { id: "grid", icon: "grid_view" },
+                { id: "kanban", icon: "view_week" },
                 { id: "table", icon: "table_rows" },
                 { id: "compact", icon: "view_headline" }
               ].map((view) => (
@@ -241,35 +317,46 @@ export function HomePage() {
               </div>
             )}
 
-            <LinkList
-              links={visibleLinks}
-              categoriesById={categoriesById}
-              remindersByLinkId={remindersByLinkId}
-              openInExternalBrowser={state.settings.openInExternalBrowser}
-              allowDrag={allowDrag}
-              onRecordVisit={(linkId) => {
-                void state.recordVisit(linkId);
-              }}
-              onToggleFavorite={(linkId) => {
-                void state.toggleFavorite(linkId);
-              }}
-              onEdit={(linkId) => state.openAddDialog(linkId)}
-              onDelete={(linkId) => {
-                const link = state.links.find((entry) => entry.id === linkId);
-                if (link && window.confirm(`Delete "${link.title}"?`)) {
-                  void state.deleteLink(linkId);
-                }
-              }}
-              onRemind={(linkId) => state.openReminderDialog(linkId)}
-              onReorder={(orderedIds) => {
-                void state.reorderLinks(orderedIds);
-              }}
-              viewMode={state.settings.viewMode}
-              selectionMode={selectionMode}
-              selectedIds={selectedIds}
-              onSelectLink={handleSelectLink}
-              tableColumns={tableColumns}
-            />
+            {state.settings.viewMode === "kanban" ? (
+              <KanbanBoard
+                links={visibleLinks}
+                onOpenReader={(link) => setReaderLink(link)}
+              />
+            ) : (
+              <LinkList
+                links={visibleLinks}
+                categoriesById={categoriesById}
+                remindersByLinkId={remindersByLinkId}
+                openInExternalBrowser={state.settings.openInExternalBrowser}
+                allowDrag={allowDrag}
+                onRecordVisit={(linkId) => {
+                  void state.recordVisit(linkId);
+                }}
+                onToggleFavorite={(linkId) => {
+                  void state.toggleFavorite(linkId);
+                }}
+                onEdit={(linkId) => state.openAddDialog(linkId)}
+                onDelete={(linkId) => {
+                  const link = state.links.find((entry) => entry.id === linkId);
+                  if (link && window.confirm(`Delete "${link.title}"?`)) {
+                    void state.deleteLink(linkId);
+                  }
+                }}
+                onRemind={(linkId) => state.openReminderDialog(linkId)}
+                onReorder={(orderedIds) => {
+                  void state.reorderLinks(orderedIds);
+                }}
+                onReadMode={(linkId) => {
+                  const found = state.links.find((entry) => entry.id === linkId);
+                  if (found) setReaderLink(found);
+                }}
+                viewMode={state.settings.viewMode}
+                selectionMode={selectionMode}
+                selectedIds={selectedIds}
+                onSelectLink={handleSelectLink}
+                tableColumns={tableColumns}
+              />
+            )}
           </div>
         )}
       </section>
@@ -283,6 +370,22 @@ export function HomePage() {
           </div>
         </div>
       )}
+
+      <BulkEditDialog
+        open={showBulkEditDialog}
+        onClose={() => setShowBulkEditDialog(false)}
+        selectedIds={selectedIds}
+        onSuccess={() => {
+          setSelectedIds(new Set());
+          setSelectionMode(false);
+        }}
+      />
+
+      <ReaderModeDialog
+        open={readerLink !== null}
+        link={readerLink}
+        onClose={() => setReaderLink(null)}
+      />
     </div>
   );
 }

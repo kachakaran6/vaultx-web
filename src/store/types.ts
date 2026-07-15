@@ -17,6 +17,14 @@ export interface LinkRecord {
   order: number;
   username?: string;
   password?: string;
+  expiresAt?: number;
+  maxVisits?: number;
+  isPinned?: boolean;
+  image?: string;
+  icon?: string;
+  workspaceId?: string;
+  backlinkIds?: string[];
+  scrollPosition?: number;
 }
 
 export interface CategoryRecord {
@@ -26,6 +34,14 @@ export interface CategoryRecord {
   color: string;
   icon: string;
   createdAt: number;
+  isSmart?: boolean;
+  rules?: {
+    tags?: string[];
+    query?: string;
+    favoriteOnly?: boolean;
+  };
+  workspaceId?: string;
+  parentCategoryId?: string;
 }
 
 export interface ReminderRecord {
@@ -48,6 +64,9 @@ export interface VaultSettings {
   notificationsEnabled: boolean;
   appLocked: boolean;
   viewMode: "list" | "grid" | "table" | "compact";
+  readingStreak?: number;
+  lastReadDate?: string;
+  activeWorkspaceId?: string;
 }
 
 export type SettingKey = keyof VaultSettings;
@@ -68,12 +87,28 @@ export interface LinkDraft {
   isFavorite: boolean;
   username?: string;
   password?: string;
+  expiresAt?: number;
+  maxVisits?: number;
+  isPinned?: boolean;
+  image?: string;
+  icon?: string;
+  workspaceId?: string;
+  backlinkIds?: string[];
+  scrollPosition?: number;
 }
 
 export interface CategoryDraft {
   name: string;
   color: string;
   icon: string;
+  isSmart?: boolean;
+  rules?: {
+    tags?: string[];
+    query?: string;
+    favoriteOnly?: boolean;
+  };
+  workspaceId?: string;
+  parentCategoryId?: string;
 }
 
 export interface ReminderDraft {

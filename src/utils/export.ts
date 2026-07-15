@@ -98,3 +98,64 @@ export function downloadTextFile(fileName: string, content: string): void {
   anchor.click();
   URL.revokeObjectURL(url);
 }
+
+export function parseNetscapeHTML(htmlText: string): Partial<LinkRecord>[] {
+  const links: Partial<LinkRecord>[] = [];
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlText, "text/html");
+  const anchors = doc.querySelectorAll("a");
+  
+  anchors.forEach((a) => {
+    const url = a.getAttribute("href");
+    if (!url) return;
+    
+    const title = a.textContent?.trim() || url;
+    const addDateStr = a.getAttribute("add_date");
+    const createdAt = addDateStr ? parseInt(addDateStr, 10) * 1000 : Date.now();
+    
+    const tagsAttr = a.getAttribute("tags") || a.getAttribute("labels") || "";
+    const tags = tagsAttr ? tagsAttr.split(",").map(t => t.trim()).filter(Boolean) : [];
+    
+    links.push({
+      title,
+      url,
+      tags,
+      createdAt
+    });
+  });
+  
+  return links;
+}
+
+export function exportCategoryPortfolio(categoryName: string, links: LinkRecord[]): void {
+  let markdown = `# Portfolio Archive: ${categoryName}\n`;
+  markdown += `*Exported on ${new Date().toLocaleDateString()} from Vault X • Total Bookmarks: ${links.length}*\n\n---\n\n`;
+
+  links.forEach((link, idx) => {
+    let hostname = "unknown";
+    try {
+      hostname = new URL(link.url).hostname;
+    } catch (e) {
+      // ignore
+    }
+    markdown += `## ${idx + 1}. [${link.title}](${link.url})\n`;
+    markdown += `- **Domain:** ${hostname}\n`;
+    if (link.tags.length > 0) {
+      markdown += `- **Tags:** ${link.tags.map(t => `\`${t}\``).join(", ")}\n`;
+    }
+    markdown += `- **Saved on:** ${new Date(link.createdAt).toLocaleDateString()}\n`;
+    if (link.notes) {
+      markdown += `\n### Summary & Notes\n\n${link.notes}\n`;
+    }
+    markdown += `\n---\n\n`;
+  });
+
+  const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  const fileName = `${categoryName.toLowerCase().replace(/\s+/g, "-")}-portfolio.md`;
+  anchor.download = fileName;
+  anchor.click();
+  URL.revokeObjectURL(anchor);
+}

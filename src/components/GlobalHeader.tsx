@@ -1,9 +1,16 @@
 import { useLocation, Link } from "react-router-dom";
-import { Search, Plus, Moon, Sun, Monitor, Sparkles, ChevronRight, Command, X } from "lucide-react";
+import { Search, Plus, Moon, Sun, Monitor, Sparkles, ChevronRight, Command, X, ChevronDown, Check } from "lucide-react";
 import { useAppStore } from "../store/app-store";
 import { useTheme } from "./ThemeProvider";
 import { Button } from "./ui/button";
 import { cn } from "../utils/cn";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "./ui/dropdown-menu";
+
+const WORKSPACES = [
+  { id: "default", name: "Default Space", icon: "space_dashboard" },
+  { id: "work", name: "Work Space", icon: "business_center" },
+  { id: "personal", name: "Personal Space", icon: "person" }
+];
 
 const ROUTE_LABELS: Record<string, string> = {
   "/home": "Home",
@@ -14,9 +21,10 @@ const ROUTE_LABELS: Record<string, string> = {
 
 export function GlobalHeader() {
   const location = useLocation();
-  const { searchQuery, setSearchQuery, openAddDialog } = useAppStore();
+  const { searchQuery, setSearchQuery, openAddDialog, settings, updateSetting } = useAppStore();
   const { theme, setTheme, neo, setNeo } = useTheme();
 
+  const activeWorkspaceId = settings.activeWorkspaceId || "default";
   const currentPage = ROUTE_LABELS[location.pathname] || "Overview";
 
   const toggleTheme = () => {
@@ -28,13 +36,34 @@ export function GlobalHeader() {
   return (
     <header className="sticky top-0 z-40 h-[60px] lg:h-[72px] w-full border-b border-border/50 bg-background/60 backdrop-blur-md flex items-center justify-between px-4 lg:px-6 shrink-0 transition-all">
 
-      {/* LEFT: Breadcrumb identity */}
+      {/* LEFT: Breadcrumb identity & Workspace Selector */}
       <div className="flex items-center min-w-0 overflow-hidden select-none gap-3">
-        <div className="flex items-center gap-2 text-[13px] font-medium">
-          {/* <span className="text-muted-foreground/70">Workspace</span> */}
-          {/* <ChevronRight size={14} className="text-muted-foreground/40 shrink-0" /> */}
-          <span className="text-foreground font-bold lg:font-semibold truncate tracking-tight">{currentPage}</span>
-        </div>
+        <span className="text-foreground font-bold lg:font-semibold truncate tracking-tight hidden lg:inline">{currentPage}</span>
+        <span className="text-muted-foreground/30 hidden lg:inline">|</span>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-secondary/50 border border-border/60 hover:bg-secondary transition-colors text-xs font-semibold text-text">
+            <span className="material-symbols-outlined text-[16px]">
+              {WORKSPACES.find(w => w.id === activeWorkspaceId)?.icon || "space_dashboard"}
+            </span>
+            <span>{WORKSPACES.find(w => w.id === activeWorkspaceId)?.name || "Default Space"}</span>
+            <ChevronDown size={12} className="text-text-muted shrink-0" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-[180px]">
+            {WORKSPACES.map((w) => (
+              <DropdownMenuItem
+                key={w.id}
+                onClick={() => void updateSetting("activeWorkspaceId", w.id)}
+                className="cursor-pointer flex items-center gap-2 h-9"
+              >
+                <span className="material-symbols-outlined text-[16px] text-text-muted">{w.icon}</span>
+                <span className="font-semibold text-[13px] text-text">{w.name}</span>
+                {activeWorkspaceId === w.id && (
+                  <Check size={14} className="ml-auto text-success shrink-0" strokeWidth={3} />
+                )}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* CENTER: Global Search */}

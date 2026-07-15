@@ -1,15 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAppStore } from "../store/app-store";
 import { useTheme } from "./ThemeProvider";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { GlobalFooter } from "./GlobalFooter";
+import { ChevronDown, Check } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "./ui/dropdown-menu";
+import { CommandPalette } from "./CommandPalette";
+
+const WORKSPACES = [
+  { id: "default", name: "Default Space", icon: "space_dashboard" },
+  { id: "work", name: "Work Space", icon: "business_center" },
+  { id: "personal", name: "Personal Space", icon: "person" }
+];
 
 const NAV_ITEMS = [
   { to: "/home", label: "Home", icon: "home" },
   { to: "/categories", label: "Categories", icon: "folder_open" },
   { to: "/stats", label: "Analytics", icon: "insights" },
+  { to: "/roadmap", label: "Roadmap", icon: "explore" },
   { to: "/settings", label: "Settings", icon: "settings" }
 ] as const;
 
@@ -125,12 +135,28 @@ export function AppShell() {
   const { theme, setTheme } = useTheme();
   const location = useLocation();
 
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const activeWorkspaceId = useAppStore((state) => state.settings.activeWorkspaceId || "default");
+  const updateSetting = useAppStore((state) => state.updateSetting);
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setShowCommandPalette((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, []);
+
   const getPageTitle = () => {
     const path = location.pathname;
     if (path.startsWith("/home")) return "Home";
     if (path.startsWith("/categories")) return "Categories";
     if (path.startsWith("/boards")) return "Mood Boards";
     if (path.startsWith("/stats")) return "Analytics";
+    if (path.startsWith("/roadmap")) return "Roadmap";
     if (path.startsWith("/settings")) return "Settings";
     return "Dashboard";
   };
@@ -147,10 +173,37 @@ export function AppShell() {
           className="fixed top-0 right-0 h-14 bg-surface/80 backdrop-blur-md border-b border-border z-40 flex justify-between items-center px-6 transition-all duration-300"
           style={{ width: `calc(100% - ${isCollapsed ? '64px' : '220px'})` }}
         >
-          <div className="flex items-center gap-2 text-sm font-medium text-text-muted">
+          <div className="flex items-center gap-2 text-sm font-medium text-text-muted shrink-0">
             <span className="hover:text-text cursor-pointer transition-colors">Vault X</span>
             <span className="opacity-40">/</span>
-            <span className="text-text font-semibold">{getPageTitle()}</span>
+            <span className="text-text font-semibold mr-2">{getPageTitle()}</span>
+            
+            <span className="opacity-40">/</span>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 px-2 py-0.5 rounded border border-border bg-surface text-xs font-semibold text-text hover:bg-surface-2 transition-colors">
+                <span className="material-symbols-outlined text-[14px]">
+                  {WORKSPACES.find(w => w.id === activeWorkspaceId)?.icon || "space_dashboard"}
+                </span>
+                <span>{WORKSPACES.find(w => w.id === activeWorkspaceId)?.name}</span>
+                <ChevronDown size={11} className="text-text-muted shrink-0 ml-0.5" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-[180px]">
+                {WORKSPACES.map((w) => (
+                  <DropdownMenuItem
+                    key={w.id}
+                    onClick={() => void updateSetting("activeWorkspaceId", w.id)}
+                    className="cursor-pointer flex items-center gap-2 h-9"
+                  >
+                    <span className="material-symbols-outlined text-[16px] text-text-muted">{w.icon}</span>
+                    <span className="font-semibold text-[13px] text-text">{w.name}</span>
+                    {activeWorkspaceId === w.id && (
+                      <Check size={14} className="ml-auto text-success shrink-0" strokeWidth={3} />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           <div className="flex items-center gap-4 flex-1 justify-end max-w-sm ml-4">
@@ -184,6 +237,11 @@ export function AppShell() {
         </div>
 
       </main>
+
+      <CommandPalette 
+        open={showCommandPalette} 
+        onClose={() => setShowCommandPalette(false)} 
+      />
     </div>
   );
 }

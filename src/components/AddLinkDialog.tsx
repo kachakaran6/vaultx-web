@@ -6,6 +6,9 @@ import { fetchLinkMetadata } from "../utils/metadata";
 import { Loader2, Check } from "lucide-react";
 import { cn } from "../utils/cn";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "./ui/dropdown-menu";
+import { Switch } from "./ui/switch";
+import { generateSecurePassword } from "../utils/security";
+import { pushToast } from "../store/toast-store";
 
 export function AddLinkDialog() {
   const open = useAppStore((state) => state.isAddDialogOpen);
@@ -31,6 +34,12 @@ export function AddLinkDialog() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isPinned, setIsPinned] = useState(false);
+  const [image, setImage] = useState("");
+  const [icon, setIcon] = useState("");
+  const [enableSelfDestruct, setEnableSelfDestruct] = useState(false);
+  const [expiryDate, setExpiryDate] = useState("");
+  const [maxVisits, setMaxVisits] = useState("");
   const [saving, setSaving] = useState(false);
   const [fetching, setFetching] = useState(false);
 
@@ -48,6 +57,12 @@ export function AddLinkDialog() {
       setUsername(existingLink.username || "");
       setPassword(existingLink.password || "");
       setIsFavorite(existingLink.isFavorite);
+      setIsPinned(existingLink.isPinned || false);
+      setImage(existingLink.image || "");
+      setIcon(existingLink.icon || "");
+      setExpiryDate(existingLink.expiresAt ? new Date(existingLink.expiresAt - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : "");
+      setMaxVisits(existingLink.maxVisits ? String(existingLink.maxVisits) : "");
+      setEnableSelfDestruct(Boolean(existingLink.expiresAt || existingLink.maxVisits));
       return;
     }
 
@@ -59,6 +74,12 @@ export function AddLinkDialog() {
     setUsername("");
     setPassword("");
     setIsFavorite(false);
+    setIsPinned(false);
+    setImage("");
+    setIcon("");
+    setExpiryDate("");
+    setMaxVisits("");
+    setEnableSelfDestruct(false);
   }, [open, addDialogLinkId, addDialogPresetUrl, existingLink, categories]);
 
   useEffect(() => {
@@ -77,6 +98,12 @@ export function AddLinkDialog() {
       if (meta?.description && !notes) {
         setNotes(meta.description);
       }
+      if (meta?.image) {
+        setImage(meta.image);
+      }
+      if (meta?.icon) {
+        setIcon(meta.icon);
+      }
     }, 1000);
 
     return () => clearTimeout(timer);
@@ -94,7 +121,12 @@ export function AddLinkDialog() {
       notes,
       username,
       password,
-      isFavorite
+      isFavorite,
+      isPinned,
+      image,
+      icon,
+      expiresAt: enableSelfDestruct && expiryDate ? new Date(expiryDate).getTime() : undefined,
+      maxVisits: enableSelfDestruct && maxVisits ? parseInt(maxVisits, 10) : undefined
     });
     setSaving(false);
     if (result.ok) {
@@ -197,7 +229,7 @@ export function AddLinkDialog() {
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-[calc(50vw-2rem)] sm:w-[220px]">
-                  {categories.map((category) => (
+                  {categories.filter(c => !c.isSmart).map((category) => (
                     <DropdownMenuItem 
                       key={category.id} 
                       onClick={() => setCategoryId(category.id)}
@@ -223,7 +255,21 @@ export function AddLinkDialog() {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-text uppercase tracking-wider">Password (Optional)</label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-text uppercase tracking-wider">Password (Optional)</label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const generated = generateSecurePassword();
+                    setPassword(generated);
+                    setShowPassword(true);
+                    pushToast({ tone: "success", title: "Generated strong password" });
+                  }}
+                  className="text-xs font-semibold text-accent hover:underline hover:text-accent-hover transition-colors"
+                >
+                  Generate
+                </button>
+              </div>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -256,24 +302,84 @@ export function AddLinkDialog() {
             />
           </div>
 
-          <label className="flex items-center justify-between p-4 rounded-lg border border-border bg-secondary/20 transition-colors cursor-pointer hover:bg-secondary/40 select-none">
-            <div className="space-y-0.5">
-              <p className="text-[14px] font-semibold text-foreground">Mark as favorite</p>
-              <p className="text-[12px] font-medium text-muted-foreground">Easily access this item later</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="flex items-center justify-between p-4 rounded-lg border border-border bg-secondary/20 transition-colors cursor-pointer hover:bg-secondary/40 select-none">
+              <div className="space-y-0.5">
+                <p className="text-[14px] font-semibold text-foreground">Mark as favorite</p>
+                <p className="text-[12px] font-medium text-muted-foreground">Easily access this item later</p>
+              </div>
+              <div className={cn(
+                "w-5 h-5 rounded border transition-all flex items-center justify-center",
+                isFavorite ? "bg-accent border-accent text-surface" : "border-border bg-surface"
+              )}>
+                {isFavorite && <Check size={14} strokeWidth={3} />}
+              </div>
+              <input
+                type="checkbox"
+                checked={isFavorite}
+                onChange={(e) => setIsFavorite(e.target.checked)}
+                className="sr-only"
+              />
+            </label>
+
+            <label className="flex items-center justify-between p-4 rounded-lg border border-border bg-secondary/20 transition-colors cursor-pointer hover:bg-secondary/40 select-none">
+              <div className="space-y-0.5">
+                <p className="text-[14px] font-semibold text-foreground">Pin to top</p>
+                <p className="text-[12px] font-medium text-muted-foreground">Keep at absolute top of list</p>
+              </div>
+              <div className={cn(
+                "w-5 h-5 rounded border transition-all flex items-center justify-center",
+                isPinned ? "bg-accent border-accent text-surface" : "border-border bg-surface"
+              )}>
+                {isPinned && <Check size={14} strokeWidth={3} />}
+              </div>
+              <input
+                type="checkbox"
+                checked={isPinned}
+                onChange={(e) => setIsPinned(e.target.checked)}
+                className="sr-only"
+              />
+            </label>
+          </div>
+
+          <div className="pt-4 border-t border-border space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <label className="text-[13px] font-semibold text-foreground">Self-Destruct (Privacy)</label>
+                <p className="text-xs text-text-muted">Automatically destroy bookmark based on age or visits.</p>
+              </div>
+              <Switch 
+                checked={enableSelfDestruct}
+                onCheckedChange={setEnableSelfDestruct}
+              />
             </div>
-            <div className={cn(
-              "w-5 h-5 rounded border transition-all flex items-center justify-center",
-              isFavorite ? "bg-accent border-accent text-surface" : "border-border bg-surface"
-            )}>
-              {isFavorite && <Check size={14} strokeWidth={3} />}
-            </div>
-            <input
-              type="checkbox"
-              checked={isFavorite}
-              onChange={(e) => setIsFavorite(e.target.checked)}
-              className="sr-only"
-            />
-          </label>
+
+            {enableSelfDestruct && (
+              <div className="grid gap-4 sm:grid-cols-2 p-3 bg-secondary/20 dark:bg-secondary/10 rounded-lg border border-border/60 animate-in fade-in duration-200">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-text uppercase tracking-wider">Expiration Date & Time</label>
+                  <input
+                    type="datetime-local"
+                    value={expiryDate}
+                    onChange={(e) => setExpiryDate(e.target.value)}
+                    className={inputBase}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-text uppercase tracking-wider">Maximum Visits Allowed</label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={maxVisits}
+                    onChange={(e) => setMaxVisits(e.target.value.replace(/\D/g, ""))}
+                    placeholder="e.g. 5 visits"
+                    className={inputBase}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </form>
     </ModalShell>

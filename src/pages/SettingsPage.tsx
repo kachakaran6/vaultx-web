@@ -9,6 +9,8 @@ import { Switch } from "../components/ui/switch";
 import { Separator } from "../components/ui/separator";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
+import { DuplicateResolverDialog } from "../components/DuplicateResolverDialog";
+import { parseNetscapeHTML } from "../utils/export";
 
 export function SettingsPage() {
   const state = useAppStore();
@@ -17,6 +19,7 @@ export function SettingsPage() {
   const [pinConfirm, setPinConfirm] = useState("");
   const [pinBusy, setPinBusy] = useState(false);
   const [showPinSetup, setShowPinSetup] = useState(false);
+  const [showDuplicateResolver, setShowDuplicateResolver] = useState(false);
 
   const [backupPassword, setBackupPassword] = useState("");
   const [exportType, setExportType] = useState<"plain" | "encrypted">("plain");
@@ -69,11 +72,30 @@ export function SettingsPage() {
     setImporting(true);
     try {
       const text = await importFile.text();
-      await state.importVault(text, { mode: importMode, password: importPassword || undefined });
+      if (importFile.name.toLowerCase().endsWith(".html")) {
+        const parsed = parseNetscapeHTML(text);
+        let addedCount = 0;
+        for (const draft of parsed) {
+          const result = await state.saveLink({
+            title: draft.title || "",
+            url: draft.url || "",
+            categoryId: "general",
+            tags: draft.tags || [],
+            notes: "",
+            isFavorite: false
+          });
+          if (result.ok) {
+            addedCount++;
+          }
+        }
+        pushToast({ tone: "success", title: "Bookmarks imported", description: `Successfully imported ${addedCount} bookmarks.` });
+      } else {
+        await state.importVault(text, { mode: importMode, password: importPassword || undefined });
+        pushToast({ tone: "success", title: "Data restored", description: "Collection imported successfully." });
+      }
       setImportFile(null);
       setImportPassword("");
       if (fileInputRef.current) fileInputRef.current.value = "";
-      pushToast({ tone: "success", title: "Data restored", description: "Collection imported successfully." });
     } catch (error) {
       pushToast({ tone: "danger", title: "Import failed", description: "Could not decode archive file. Check password if encrypted." });
     } finally {
@@ -298,7 +320,7 @@ export function SettingsPage() {
                 <Input
                   ref={fileInputRef}
                   type="file"
-                  accept=".json"
+                  accept=".json,.html"
                   onChange={(e) => setImportFile(e.target.files?.[0] ?? null)}
                   className="max-w-xs cursor-pointer"
                 />
@@ -336,6 +358,24 @@ export function SettingsPage() {
 
         <Separator />
         
+        {/* Database Maintenance Tools */}
+        <section className="bg-surface border border-border rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h3 className="text-base font-semibold text-text tracking-tight">Database Maintenance</h3>
+            <p className="text-xs text-text-muted">Scan bookmarks for exact URL duplicates or identical titles to merge tags, notes, and visits.</p>
+          </div>
+          <Button 
+            variant="outline" 
+            className="shrink-0 w-full sm:w-auto"
+            onClick={() => setShowDuplicateResolver(true)}
+          >
+            <span className="material-symbols-outlined mr-2 text-[18px]">find_replace</span>
+            Resolve Duplicates
+          </Button>
+        </section>
+
+        <Separator />
+        
         {/* Danger Zone */}
         <section className="bg-danger/5 border border-danger/20 rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
@@ -355,6 +395,11 @@ export function SettingsPage() {
             Reset Vault
           </Button>
         </section>
+
+        <DuplicateResolverDialog
+          open={showDuplicateResolver}
+          onClose={() => setShowDuplicateResolver(false)}
+        />
 
       </div>
     </div>

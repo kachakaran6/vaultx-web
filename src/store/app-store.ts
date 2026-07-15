@@ -15,7 +15,7 @@ import {
 import { CATEGORY_SWATCHES, createDefaultCategories, slugifyCategoryId } from "../utils/colors";
 import { advanceReminderTime, getNextReminderTrigger } from "../utils/date";
 import { ensureNotificationPermission } from "../utils/notifications";
-import { hashPin, verifyPin } from "../utils/security";
+import { hashPin, verifyPin, detectConfusableDomain } from "../utils/security";
 import { getDomain, ensureUrlProtocol, normalizeUrl } from "../utils/url";
 import { pushToast } from "./toast-store";
 import type {
@@ -34,11 +34,48 @@ import type {
 } from "./types";
 
 function sortLinks(links: LinkRecord[]): LinkRecord[] {
-  return [...links].sort((a, b) => a.order - b.order || b.createdAt - a.createdAt);
+  return [...links].sort((a, b) => {
+    const pinA = a.isPinned ? 1 : 0;
+    const pinB = b.isPinned ? 1 : 0;
+    if (pinA !== pinB) {
+      return pinB - pinA;
+    }
+    return a.order - b.order || b.createdAt - a.createdAt;
+  });
 }
 
 function sortCategories(categories: CategoryRecord[]): CategoryRecord[] {
   return [...categories].sort((a, b) => a.createdAt - b.createdAt || a.name.localeCompare(b.name));
+}
+
+function isYesterday(dateStr: string): boolean {
+  if (!dateStr) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const checkDate = new Date(dateStr);
+  checkDate.setHours(0, 0, 0, 0);
+  const diffTime = today.getTime() - checkDate.getTime();
+  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays === 1;
+}
+
+function inferSemanticTags(tags: string[]): string[] {
+  const inferred = new Set<string>(tags.map(t => t.toLowerCase()));
+  tags.forEach(t => {
+    const lower = t.toLowerCase();
+    if (lower === "react" || lower === "vue" || lower === "angular") {
+      inferred.add("frontend");
+      inferred.add("javascript");
+    }
+    if (lower === "rust" || lower === "go" || lower === "python" || lower === "nodejs") {
+      inferred.add("backend");
+    }
+    if (lower === "docker" || lower === "kubernetes" || lower === "aws") {
+      inferred.add("devops");
+      inferred.add("cloud");
+    }
+  });
+  return Array.from(inferred);
 }
 
 function sortReminders(reminders: ReminderRecord[]): ReminderRecord[] {
@@ -118,6 +155,11 @@ interface AppStore {
   updateSetting: <K extends SettingKey>(key: K, value: VaultSettings[K]) => Promise<void>;
   saveLink: (draft: LinkDraft) => Promise<{ ok: boolean; reason?: string }>;
   deleteLink: (linkId: string) => Promise<void>;
+  bulkDeleteLinks: (linkIds: string[]) => Promise<void>;
+  bulkUpdateLinksMetadata: (
+    linkIds: string[],
+    updates: { categoryId?: string; addTags?: string[]; removeTags?: string[] }
+  ) => Promise<void>;
   toggleFavorite: (linkId: string) => Promise<void>;
   recordVisit: (linkId: string) => Promise<void>;
   reorderLinks: (orderedIds: string[]) => Promise<void>;
@@ -133,6 +175,8 @@ interface AppStore {
   clearPin: () => Promise<void>;
   unlockVault: (pin: string) => Promise<boolean>;
   lockVault: () => void;
+  timeMachineDate: string | null;
+  setTimeMachineDate: (date: string | null) => void;
 }
 
 export const useAppStore = create<AppStore>((set, get) => ({
@@ -151,6 +195,8 @@ export const useAppStore = create<AppStore>((set, get) => ({
   isCategoryDialogOpen: false,
   isAddDialogOpen: false,
   clipboardPromptUrl: null,
+  timeMachineDate: null,
+  setTimeMachineDate: (date) => set({ timeMachineDate: date }),
 
   bootstrap: async () => {
     if (get().bootstrapping || get().ready) {
@@ -173,8 +219,23 @@ export const useAppStore = create<AppStore>((set, get) => ({
   },
 
   refreshVault: async () => {
-    const [links, categories, reminders, settingsRecords] = await Promise.all([
-      db.links.toArray(),
+    let links = await db.links.toArray();
+    
+    const now = Date.now();
+    const expiredIds = links.filter(l => 
+      (l.expiresAt && l.expiresAt <= now) || 
+      (l.maxVisits && l.visitCount >= l.maxVisits)
+    ).map(l => l.id);
+
+    if (expiredIds.length > 0) {
+      await db.transaction("rw", db.links, db.reminders, async () => {
+        await db.links.bulkDelete(expiredIds);
+        await db.reminders.where("linkId").anyOf(expiredIds).delete();
+      });
+      links = await db.links.toArray();
+    }
+
+    const [categories, reminders, settingsRecords] = await Promise.all([
       db.categories.toArray(),
       db.reminders.toArray(),
       db.settings.toArray()
@@ -261,6 +322,15 @@ export const useAppStore = create<AppStore>((set, get) => ({
       return { ok: false, reason: "invalid-url" };
     }
 
+    const phishingTarget = detectConfusableDomain(preparedUrl);
+    if (phishingTarget) {
+      pushToast({
+        tone: "warning",
+        title: "Suspicious Domain Alert! ⚠️",
+        description: `This address lookalike targets "${phishingTarget}". Please verify accuracy before saving.`
+      });
+    }
+
     const existing = draft.id ? get().links.find((link) => link.id === draft.id) : undefined;
     const duplicate = get().links.find(
       (link) => link.normalizedUrl === normalizedUrl && link.id !== draft.id
@@ -275,9 +345,49 @@ export const useAppStore = create<AppStore>((set, get) => ({
       return { ok: false, reason: "duplicate" };
     }
 
-    const categoryId =
-      get().categories.find((category) => category.id === draft.categoryId)?.id ??
-      getGeneralCategoryId(get().categories);
+    // Auto-Categorization based on URL/title keywords
+    let categoryId = draft.categoryId;
+    if (categoryId === "general" || !categoryId) {
+      const titleLower = draft.title.toLowerCase();
+      const urlLower = preparedUrl.toLowerCase();
+      const matchedCat = get().categories.find((c) => {
+        if (c.isSmart || c.id === "general") return false;
+        const name = c.name.toLowerCase();
+        if (name.includes("dev") || name.includes("code") || name.includes("tech")) {
+          return urlLower.includes("github") || urlLower.includes("stackoverflow") || urlLower.includes("npm") || titleLower.includes("programming") || titleLower.includes("code");
+        }
+        if (name.includes("media") || name.includes("video") || name.includes("entertainment") || name.includes("social")) {
+          return urlLower.includes("youtube") || urlLower.includes("vimeo") || urlLower.includes("twitter") || urlLower.includes("x.com") || urlLower.includes("instagram");
+        }
+        if (name.includes("read") || name.includes("article") || name.includes("news") || name.includes("blog")) {
+          return urlLower.includes("medium.com") || urlLower.includes("substack") || urlLower.includes("nytimes") || urlLower.includes("wikipedia");
+        }
+        return false;
+      });
+      if (matchedCat) {
+        categoryId = matchedCat.id;
+        pushToast({
+          tone: "info",
+          title: "Auto-Categorized! 📁",
+          description: `Mapped to "${matchedCat.name}" based on keywords.`
+        });
+      } else {
+        categoryId = getGeneralCategoryId(get().categories);
+      }
+    }
+
+    // Auto-Summarization: extract 3 bullet points if notes are empty
+    let finalNotes = draft.notes.trim();
+    if (!finalNotes && draft.title) {
+      const bullet1 = `• Bookmark saved from ${getDomain(preparedUrl)}.`;
+      const bullet2 = `• Focus Area: ${draft.title}.`;
+      const bullet3 = draft.tags.length > 0 
+        ? `• Tagged under: ${draft.tags.join(", ")}.` 
+        : `• Automatically parsed for quick offline retrieval.`;
+      finalNotes = `${bullet1}\n${bullet2}\n${bullet3}`;
+    }
+
+    const semanticTags = inferSemanticTags(draft.tags);
 
     const topOrder =
       get().links.length === 0 ? 0 : Math.min(...get().links.map((link) => link.order)) - 1;
@@ -288,11 +398,19 @@ export const useAppStore = create<AppStore>((set, get) => ({
       url: preparedUrl,
       normalizedUrl,
       categoryId,
-      tags: sanitizeTags(draft.tags),
-      notes: draft.notes.trim(),
+      tags: sanitizeTags(semanticTags),
+      notes: finalNotes,
       isFavorite: draft.isFavorite,
       username: draft.username?.trim() || undefined,
       password: draft.password?.trim() || undefined,
+      expiresAt: draft.expiresAt,
+      maxVisits: draft.maxVisits,
+      isPinned: draft.isPinned || false,
+      image: draft.image || existing?.image,
+      icon: draft.icon || existing?.icon,
+      workspaceId: draft.workspaceId || get().settings.activeWorkspaceId || "default",
+      backlinkIds: draft.backlinkIds || existing?.backlinkIds || [],
+      scrollPosition: draft.scrollPosition || existing?.scrollPosition || 0,
       createdAt: existing?.createdAt ?? now,
       lastVisited: existing?.lastVisited ?? null,
       visitCount: existing?.visitCount ?? 0,
@@ -331,6 +449,58 @@ export const useAppStore = create<AppStore>((set, get) => ({
     });
   },
 
+  bulkDeleteLinks: async (linkIds) => {
+    await db.transaction("rw", db.links, db.reminders, async () => {
+      await db.links.bulkDelete(linkIds);
+      await db.reminders.where("linkId").anyOf(linkIds).delete();
+    });
+
+    await get().refreshVault();
+
+    pushToast({
+      tone: "danger",
+      title: `${linkIds.length} links deleted`
+    });
+  },
+
+  bulkUpdateLinksMetadata: async (linkIds, updates) => {
+    await db.transaction("rw", db.links, async () => {
+      const links = await db.links.where("id").anyOf(linkIds).toArray();
+      const updated = links.map((link) => {
+        let categoryId = link.categoryId;
+        if (updates.categoryId) {
+          categoryId = updates.categoryId;
+        }
+
+        let tags = [...link.tags];
+        if (updates.addTags && updates.addTags.length > 0) {
+          tags = mergeUniqueStrings(tags, updates.addTags);
+        }
+
+        if (updates.removeTags && updates.removeTags.length > 0) {
+          const toRemove = new Set(updates.removeTags.map((t) => t.toLowerCase()));
+          tags = tags.filter((tag) => !toRemove.has(tag.toLowerCase()));
+        }
+
+        return {
+          ...link,
+          categoryId,
+          tags: sanitizeTags(tags)
+        };
+      });
+
+      await db.links.bulkPut(updated);
+    });
+
+    await get().refreshVault();
+
+    pushToast({
+      tone: "success",
+      title: "Bulk edit applied",
+      description: `Updated metadata for ${linkIds.length} links`
+    });
+  },
+
   toggleFavorite: async (linkId) => {
     const link = get().links.find((entry) => entry.id === linkId);
     if (!link) {
@@ -350,12 +520,53 @@ export const useAppStore = create<AppStore>((set, get) => ({
       return;
     }
 
-    await db.links.update(linkId, {
-      visitCount: link.visitCount + 1,
-      lastVisited: Date.now()
-    });
+    const nextVisits = link.visitCount + 1;
+    if (link.maxVisits && nextVisits >= link.maxVisits) {
+      await db.transaction("rw", db.links, db.reminders, async () => {
+        await db.links.delete(linkId);
+        const reminder = await db.reminders.where("linkId").equals(linkId).first();
+        if (reminder) {
+          await db.reminders.delete(reminder.id);
+        }
+      });
+      await get().refreshVault();
+      pushToast({
+        tone: "warning",
+        title: "Link self-destructed",
+        description: `"${link.title}" hit its max visit limit (${link.maxVisits}) and was deleted.`
+      });
+    } else {
+      // Track Reading Streak
+      const todayStr = new Date().toISOString().split("T")[0];
+      const lastRead = get().settings.lastReadDate || "";
+      let streak = get().settings.readingStreak || 0;
+      
+      if (lastRead !== todayStr) {
+        if (isYesterday(lastRead)) {
+          streak += 1;
+          pushToast({
+            tone: "success",
+            title: "Reading Streak Extended! 🎯",
+            description: `You are on a ${streak}-day reading streak. Keep it up!`
+          });
+        } else {
+          streak = 1;
+          pushToast({
+            tone: "success",
+            title: "New Reading Streak Started! 📚",
+            description: "Visit a link every day to build your streak."
+          });
+        }
+        await get().updateSetting("lastReadDate", todayStr);
+        await get().updateSetting("readingStreak", streak);
+      }
 
-    await get().refreshVault();
+      await db.links.update(linkId, {
+        visitCount: nextVisits,
+        lastVisited: Date.now()
+      });
+      await get().refreshVault();
+    }
   },
 
   reorderLinks: async (orderedIds) => {
@@ -411,14 +622,18 @@ export const useAppStore = create<AppStore>((set, get) => ({
       isDefault: false,
       color: draft.color,
       icon: draft.icon.trim() || "📌",
-      createdAt: Date.now()
+      createdAt: Date.now(),
+      isSmart: draft.isSmart,
+      rules: draft.rules,
+      parentCategoryId: draft.parentCategoryId,
+      workspaceId: draft.workspaceId || get().settings.activeWorkspaceId || "default"
     });
 
     await get().refreshVault();
 
     pushToast({
       tone: "success",
-      title: "Category created",
+      title: draft.isSmart ? "Smart collection created" : "Category created",
       description: name
     });
 
@@ -885,24 +1100,129 @@ export const useAppStore = create<AppStore>((set, get) => ({
     }))
 }));
 
+function getLevenshteinDistance(a: string, b: string): number {
+  const tmp: number[][] = [];
+  let i, j;
+  for (i = 0; i <= a.length; i++) {
+    tmp.push([i]);
+  }
+  for (j = 1; j <= b.length; j++) {
+    tmp[0].push(j);
+  }
+  for (i = 1; i <= a.length; i++) {
+    for (j = 1; j <= b.length; j++) {
+      tmp[i][j] = Math.min(
+        tmp[i - 1][j] + 1,
+        tmp[i][j - 1] + 1,
+        tmp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+      );
+    }
+  }
+  return tmp[a.length][b.length];
+}
+
+function isFuzzyMatch(query: string, target: string): boolean {
+  if (!query) return true;
+  const q = query.toLowerCase().trim();
+  const t = target.toLowerCase().trim();
+  
+  if (t.includes(q)) return true;
+  
+  const qWords = q.split(/\s+/).filter(Boolean);
+  const tWords = t.split(/[\s\-_\.\/]+/).filter(Boolean);
+  
+  return qWords.every(qw => {
+    if (qw.length <= 3) {
+      return tWords.some(tw => tw.includes(qw));
+    }
+    
+    const maxDistance = qw.length <= 5 ? 1 : 2;
+    return tWords.some(tw => {
+      if (tw.includes(qw) || qw.includes(tw)) return true;
+      
+      if (Math.abs(tw.length - qw.length) <= maxDistance) {
+        const dist = getLevenshteinDistance(qw, tw);
+        if (dist <= maxDistance) return true;
+      }
+      return false;
+    });
+  });
+}
+
+function matchesSmartRules(
+  link: LinkRecord,
+  rules?: { tags?: string[]; query?: string; favoriteOnly?: boolean }
+): boolean {
+  if (!rules) return true;
+
+  if (rules.tags && rules.tags.length > 0) {
+    const hasAllTags = rules.tags.every((t) =>
+      link.tags.some((lt) => lt.toLowerCase() === t.toLowerCase())
+    );
+    if (!hasAllTags) return false;
+  }
+
+  if (rules.query) {
+    const q = rules.query.toLowerCase().trim();
+    const matches =
+      link.title.toLowerCase().includes(q) || link.url.toLowerCase().includes(q);
+    if (!matches) return false;
+  }
+
+  if (rules.favoriteOnly && !link.isFavorite) {
+    return false;
+  }
+
+  return true;
+}
+
 export function selectVisibleLinks(state: AppStore): LinkRecord[] {
   const query = state.searchQuery.trim().toLowerCase();
   const categoriesById = new Map(state.categories.map((category) => [category.id, category]));
+  const selectedCategory = state.selectedCategoryId ? categoriesById.get(state.selectedCategoryId) : null;
+  const activeWorkspace = state.settings.activeWorkspaceId || "default";
+
   const source =
     state.homeView === "favorites"
       ? state.links.filter((link) => link.isFavorite)
       : state.links;
 
-  return source.filter((link) => {
+  let workspaceSource = source.filter((link) => {
+    const cat = categoriesById.get(link.categoryId);
+    const linkWorkspace = link.workspaceId || "default";
+    const catWorkspace = cat?.workspaceId || "default";
+    return linkWorkspace === activeWorkspace || catWorkspace === activeWorkspace;
+  });
+
+  if (state.timeMachineDate) {
+    const targetDate = state.timeMachineDate;
+    workspaceSource = workspaceSource.filter((link) => {
+      const linkDate = new Date(link.createdAt).toISOString().split("T")[0];
+      return linkDate === targetDate;
+    });
+  }
+
+  return workspaceSource.filter((link) => {
     const categoryName = categoriesById.get(link.categoryId)?.name.toLowerCase() ?? "";
-    const matchesCategory =
-      !state.selectedCategoryId || link.categoryId === state.selectedCategoryId;
+    
+    let matchesCategory = false;
+    if (!state.selectedCategoryId) {
+      matchesCategory = true;
+    } else if (selectedCategory?.isSmart) {
+      matchesCategory = matchesSmartRules(link, selectedCategory.rules);
+    } else {
+      matchesCategory = link.categoryId === state.selectedCategoryId;
+    }
+      
+    if (!query) {
+      return matchesCategory;
+    }
+
     const matchesQuery =
-      !query ||
-      link.title.toLowerCase().includes(query) ||
-      link.url.toLowerCase().includes(query) ||
-      categoryName.includes(query) ||
-      link.tags.some((tag) => tag.toLowerCase().includes(query));
+      isFuzzyMatch(query, link.title) ||
+      isFuzzyMatch(query, link.url) ||
+      isFuzzyMatch(query, categoryName) ||
+      link.tags.some((tag) => isFuzzyMatch(query, tag));
 
     return matchesCategory && matchesQuery;
   });
@@ -910,12 +1230,38 @@ export function selectVisibleLinks(state: AppStore): LinkRecord[] {
 
 export function selectLinkCountsByCategory(state: AppStore): Map<string, number> {
   const counts = new Map<string, number>();
+  const activeWorkspace = state.settings.activeWorkspaceId || "default";
+  const categoriesById = new Map(state.categories.map((c) => [c.id, c]));
+
+  const workspaceLinks = state.links.filter((link) => {
+    const cat = categoriesById.get(link.categoryId);
+    const linkWorkspace = link.workspaceId || "default";
+    const catWorkspace = cat?.workspaceId || "default";
+    return linkWorkspace === activeWorkspace || catWorkspace === activeWorkspace;
+  });
+
   for (const category of state.categories) {
     counts.set(category.id, 0);
   }
 
-  for (const link of state.links) {
-    counts.set(link.categoryId, (counts.get(link.categoryId) ?? 0) + 1);
+  for (const category of state.categories) {
+    if (category.isSmart) {
+      let matchCount = 0;
+      for (const link of workspaceLinks) {
+        if (matchesSmartRules(link, category.rules)) {
+          matchCount++;
+        }
+      }
+      counts.set(category.id, matchCount);
+    }
+  }
+
+  for (const link of workspaceLinks) {
+    const catId = link.categoryId;
+    const cat = categoriesById.get(catId);
+    if (cat && !cat.isSmart) {
+      counts.set(catId, (counts.get(catId) ?? 0) + 1);
+    }
   }
 
   return counts;
