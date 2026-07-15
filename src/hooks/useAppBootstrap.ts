@@ -10,6 +10,15 @@ export function useAppBootstrap(): void {
   const settings = useAppStore((state) => state.settings);
 
   useEffect(() => {
+    // Request persistent storage to prevent the browser from deleting IndexedDB data
+    if (navigator.storage && navigator.storage.persist) {
+      navigator.storage.persist().then(persistent => {
+        if (!persistent) {
+          console.warn("Storage will not be persistent and could be cleared by the browser.");
+        }
+      }).catch(console.error);
+    }
+
     void bootstrap().then(async () => {
       const hash = window.location.hash;
       if (hash.startsWith("#import=")) {

@@ -4,6 +4,7 @@ import { useAppStore } from "../store/app-store";
 import { useTheme } from "./ThemeProvider";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback } from "./ui/avatar";
+import { GlobalFooter } from "./GlobalFooter";
 
 const NAV_ITEMS = [
   { to: "/home", label: "Home", icon: "home" },
@@ -175,8 +176,11 @@ export function AppShell() {
           </div>
         </header>
 
-        <div className={`mt-14 custom-scrollbar w-full ${location.pathname.match(/^\/boards\/[a-zA-Z0-9-]+$/) ? 'h-[calc(100vh-56px)] overflow-hidden' : 'h-full overflow-y-auto px-6 pt-6 pb-32'}`}>
-          <Outlet />
+        <div className={`mt-14 custom-scrollbar w-full ${location.pathname.match(/^\/boards\/[a-zA-Z0-9-]+$/) ? 'h-[calc(100vh-56px)] overflow-hidden' : 'h-[calc(100vh-56px)] overflow-y-auto flex flex-col'}`}>
+          <div className={`flex-1 flex flex-col ${location.pathname.match(/^\/boards\/[a-zA-Z0-9-]+$/) ? '' : 'px-6 pt-6 pb-24'}`}>
+            <Outlet />
+          </div>
+          {!location.pathname.match(/^\/boards\/[a-zA-Z0-9-]+$/) && <GlobalFooter />}
         </div>
 
       </main>

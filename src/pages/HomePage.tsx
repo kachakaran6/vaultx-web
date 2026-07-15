@@ -276,7 +276,7 @@ export function HomePage() {
 
       {/* Footer Summary Stats */}
       {visibleLinks.length > 0 && (
-        <div className="mt-8 flex justify-center pb-8">
+        <div className="mt-8 flex justify-center">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-surface rounded-full border border-border text-text-muted text-xs font-medium shadow-sm">
               <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></div>
               Showing {visibleLinks.length} of {state.links.length} links

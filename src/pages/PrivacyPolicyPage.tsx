@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Lock, FileText, CheckCircle2 } from 'lucide-react';
+import { Shield, Lock, FileText, CheckCircle2, Mail, Globe, Github as GithubIcon, Linkedin as LinkedinIcon, Instagram as InstagramIcon } from 'lucide-react';
 
 export function PrivacyPolicyPage() {
   const sections = [
@@ -81,6 +81,23 @@ export function PrivacyPolicyPage() {
           <p className="text-xs text-vault-muted mt-2 opacity-60">
             © {new Date().getFullYear()} Vault X. All rights reserved.
           </p>
+          <div className="flex justify-center items-center gap-5 mt-6">
+            <a href="mailto:kachakaran06@gmail.com" aria-label="Email" className="text-vault-muted hover:text-vault-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vault-primary rounded-sm">
+              <Mail className="w-5 h-5" />
+            </a>
+            <a href="https://www.kachakaran.me/" target="_blank" rel="noreferrer" aria-label="Portfolio" className="text-vault-muted hover:text-vault-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vault-primary rounded-sm">
+              <Globe className="w-5 h-5" />
+            </a>
+            <a href="https://github.com/kachakaran6" target="_blank" rel="noreferrer" aria-label="GitHub" className="text-vault-muted hover:text-vault-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vault-primary rounded-sm">
+              <GithubIcon className="w-5 h-5" />
+            </a>
+            <a href="https://www.linkedin.com/in/kacha-karan/" target="_blank" rel="noreferrer" aria-label="LinkedIn" className="text-vault-muted hover:text-vault-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vault-primary rounded-sm">
+              <LinkedinIcon className="w-5 h-5" />
+            </a>
+            <a href="https://www.instagram.com/kacha_karan_/" target="_blank" rel="noreferrer" aria-label="Instagram" className="text-vault-muted hover:text-vault-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vault-primary rounded-sm">
+              <InstagramIcon className="w-5 h-5" />
+            </a>
+          </div>
         </div>
       </div>
     </div>
