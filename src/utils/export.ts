@@ -157,5 +157,5 @@ export function exportCategoryPortfolio(categoryName: string, links: LinkRecord[
   const fileName = `${categoryName.toLowerCase().replace(/\s+/g, "-")}-portfolio.md`;
   anchor.download = fileName;
   anchor.click();
-  URL.revokeObjectURL(anchor);
+  URL.revokeObjectURL(url);
 }

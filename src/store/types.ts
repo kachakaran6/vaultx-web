@@ -63,7 +63,7 @@ export interface VaultSettings {
   clipboardLastPromptUrl: string;
   notificationsEnabled: boolean;
   appLocked: boolean;
-  viewMode: "list" | "grid" | "table" | "compact";
+  viewMode: "list" | "grid" | "table" | "compact" | "kanban";
   readingStreak?: number;
   lastReadDate?: string;
   activeWorkspaceId?: string;
